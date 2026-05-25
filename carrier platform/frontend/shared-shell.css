@@ -1,0 +1,222 @@
+:root {
+  --cf-shell-bg: rgba(8, 12, 24, 0.86);
+  --cf-shell-border: rgba(255, 255, 255, 0.12);
+  --cf-shell-text: #e6ebff;
+  --cf-shell-text-muted: #a5afd3;
+  --cf-shell-accent: #57d6ff;
+  --cf-surface: #0d1428;
+  --cf-surface-border: rgba(87, 214, 255, 0.2);
+}
+
+body.cf-shell-enabled {
+  padding-top: 66px;
+}
+
+.cf-shell-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 12000;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(90deg, var(--cf-shell-bg), rgba(18, 26, 52, 0.78));
+  border-bottom: 1px solid var(--cf-shell-border);
+}
+
+.cf-shell-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cf-shell-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cf-shell-text);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  font-size: 15px;
+}
+
+.cf-shell-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #b8f4ff 0%, var(--cf-shell-accent) 70%);
+  box-shadow: 0 0 12px rgba(87, 214, 255, 0.8);
+}
+
+.cf-shell-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cf-shell-link {
+  color: var(--cf-shell-text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  transition: all 0.18s ease;
+}
+
+.cf-shell-link:hover,
+.cf-shell-link.active {
+  color: var(--cf-shell-text);
+  border-color: rgba(87, 214, 255, 0.35);
+  background: rgba(87, 214, 255, 0.12);
+}
+
+.cf-shell-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-shell-btn {
+  border: 1px solid rgba(87, 214, 255, 0.35);
+  color: var(--cf-shell-text);
+  background: rgba(87, 214, 255, 0.14);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 11px;
+  cursor: pointer;
+}
+
+.cf-shell-btn:hover {
+  background: rgba(87, 214, 255, 0.22);
+}
+
+.cf-feature-gate {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 14900;
+  background: rgba(4, 8, 18, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 18px;
+}
+
+.cf-feature-gate.open {
+  display: flex;
+}
+
+.cf-feature-gate-card {
+  width: min(460px, 96vw);
+  background: #0d162b;
+  border: 1px solid rgba(87, 214, 255, 0.3);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  color: var(--cf-shell-text);
+}
+
+.cf-feature-gate-card h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.cf-feature-gate-card p {
+  margin: 0 0 14px;
+  color: var(--cf-shell-text-muted);
+  font-size: 14px;
+}
+
+.cf-feature-gate-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Prevent duplicate navbars from older page templates */
+body.cf-shell-enabled .navbar,
+body.cf-shell-enabled .mobile-menu {
+  display: none !important;
+}
+
+/* Shared look across feature pages */
+body[data-cf-page="resume-builder"],
+body[data-cf-page="resume-analyzer"],
+body[data-cf-page="interviewer"] {
+  background: radial-gradient(1200px 700px at 10% -10%, rgba(87, 214, 255, 0.1), transparent 60%),
+    radial-gradient(900px 500px at 90% -10%, rgba(124, 58, 237, 0.12), transparent 60%),
+    #0a1020;
+}
+
+body[data-cf-page="resume-builder"] .panel,
+body[data-cf-page="resume-analyzer"] .sidebar,
+body[data-cf-page="resume-analyzer"] .preview-panel {
+  background: linear-gradient(160deg, rgba(13, 20, 40, 0.95), rgba(17, 28, 56, 0.92)) !important;
+  border: 1px solid var(--cf-surface-border) !important;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.45) !important;
+}
+
+body[data-cf-page="resume-builder"] .btn,
+body[data-cf-page="resume-analyzer"] #tlr {
+  background: linear-gradient(135deg, #57d6ff 0%, #7c3aed 100%) !important;
+  color: #071126 !important;
+  border: none !important;
+}
+
+body[data-cf-page="resume-builder"] .container {
+  max-height: calc(100dvh - 90px);
+  overflow: hidden;
+}
+
+body[data-cf-page="resume-builder"] .panel {
+  max-height: calc(100dvh - 130px);
+  overflow: auto;
+}
+
+body[data-cf-page="resume-analyzer"] .main-container {
+  max-height: calc(100dvh - 92px);
+}
+
+body[data-cf-page="interviewer"] .screen {
+  height: calc(100dvh - 66px);
+  min-height: calc(100vh - 66px);
+}
+
+@media (max-width: 980px) {
+  .cf-shell-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .cf-shell-links {
+    width: 100%;
+    justify-content: center;
+  }
+
+  body.cf-shell-enabled {
+    padding-top: 104px;
+  }
+
+  body[data-cf-page="interviewer"] .screen {
+    height: calc(100dvh - 104px);
+    min-height: calc(100vh - 104px);
+  }
+
+  body[data-cf-page="resume-builder"] .container,
+  body[data-cf-page="resume-analyzer"] .main-container {
+    max-height: calc(100dvh - 132px);
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "ai-interview-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for AI Mock Interview application",
+  "scripts": {
+    "start": "npx serve . --listen 3000"
+  },
+  "keywords": ["interview", "ai", "mock-interview"],
+  "author": "",
+  "license": "MIT"
+}

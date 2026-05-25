@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/interviewer/">
+<title>AI Mock Interview</title>
+<!-- PDF.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="/shared-shell.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SETUP SCREEN
+══════════════════════════════════════════ -->
+<div id="setup" class="screen active">
+  <div class="setup-card">
+
+    <div class="setup-header">
+      <div class="logo-dot"></div>
+      <span class="setup-title">AI Mock Interview</span>
+    </div>
+    <p class="setup-sub">Upload your resume and paste the job description. Our AI interviewer will conduct a live voice interview and give you a detailed report.</p>
+
+    <!-- Job Description -->
+    <div class="field">
+      <label>Job Description</label>
+      <textarea id="jobDesc" placeholder="Paste the full job description here…" rows="5"></textarea>
+    </div>
+
+    <!-- Resume PDF Upload -->
+    <div class="field">
+      <label>Resume (PDF)</label>
+      <div class="pdf-drop" id="pdfDrop" onclick="document.getElementById('pdfInput').click()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="drop-icon">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/>
+          <line x1="12" y1="12" x2="12" y2="18"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+        <span class="drop-text" id="dropText">Click to upload PDF resume</span>
+        <span class="drop-sub">or drag and drop</span>
+      </div>
+      <input type="file" id="pdfInput" accept=".pdf" onchange="handlePdfUpload(event)">
+      <div class="pdf-preview" id="pdfPreview" style="display:none">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+        <span id="pdfName"></span>
+        <span class="pdf-chars" id="pdfChars"></span>
+        <button class="pdf-clear" onclick="clearPdf()">×</button>
+      </div>
+    </div>
+
+    <!-- Type + Difficulty + Number of Questions -->
+    <div class="row2">
+      <div class="field">
+        <label>Interview Type</label>
+        <select id="intType">
+          <option value="general">General</option>
+          <option value="technical">Technical</option>
+          <option value="behavioral">Behavioral</option>
+          <option value="case">Case Study</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Difficulty</label>
+        <select id="difficulty">
+          <option value="junior">Entry Level</option>
+          <option value="mid" selected>Mid Level</option>
+          <option value="senior">Senior Level</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Number of Questions</label>
+        <input type="number" id="numQuestions" min="3" max="20" value="6" placeholder="Number of questions">
+      </div>
+    </div>
+
+    <div class="field shadow-field">
+      <label for="shadowModeToggle">Shadow Mode</label>
+      <div class="shadow-row">
+        <div>
+          <div class="shadow-title">Learner mode</div>
+          <div class="shadow-sub">After each answer, the AI will speak an ideal response before moving to the next question.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="shadowModeToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="startBtn" onclick="openDeviceCheck()">Continue to Device Check →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DEVICE CHECK SCREEN
+══════════════════════════════════════════ -->
+<div id="deviceCheck" class="screen">
+  <div class="device-card">
+
+    <div class="setup-header">
+      <div class="logo-dot"></div>
+      <span class="setup-title">Device Check</span>
+    </div>
+    <p class="setup-sub">Choose your camera and microphone, test them, then continue to the interview.</p>
+
+    <div class="row2 device-row">
+      <div class="field">
+        <label>Camera</label>
+        <select id="cameraSelect"></select>
+      </div>
+      <div class="field">
+        <label>Microphone</label>
+        <select id="micSelect"></select>
+      </div>
+    </div>
+
+    <div class="device-preview-wrap">
+      <div class="device-preview">
+        <video id="deviceVideo" autoplay muted playsinline></video>
+        <div class="cam-off" id="deviceCamOff">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M15 10l4.553-2.278A1 1 0 0121 8.67v6.66a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+            <line x1="2" y1="2" x2="22" y2="22" stroke-width="1.5"/>
+          </svg>
+          <span>Camera preview unavailable</span>
+        </div>
+      </div>
+
+      <div class="mic-test-card">
+        <div class="mic-test-head">Microphone Test</div>
+        <div class="mic-meter" id="micTestMeter">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="mic-level-text" id="micLevelText">Waiting for microphone signal…</div>
+      </div>
+    </div>
+
+    <div class="device-actions">
+      <button class="ctrl-btn" onclick="backToSetup()">← Back</button>
+      <button class="ctrl-btn" onclick="refreshDeviceList()">Refresh Devices</button>
+      <button class="btn-primary" id="deviceContinueBtn" onclick="startInterviewFromDeviceCheck()">Start Interview →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     INTERVIEW SCREEN
+══════════════════════════════════════════ -->
+<div id="interview" class="screen">
+
+  <!-- Top bar -->
+  <div class="int-topbar">
+    <div class="int-brand"><div class="rec-dot"></div>Live Interview</div>
+    <div class="int-info" id="progressInfo">Question 1 of 6</div>
+    <div class="int-timer" id="timerEl">00:00</div>
+  </div>
+
+  <!-- Video panels -->
+  <div class="int-main">
+
+    <!-- AI Panel -->
+    <div class="vid-panel" id="aiPanel">
+      <div class="ai-bg"></div>
+      <div class="ai-avatar-wrap">
+        <div class="ai-avatar" id="aiAvatarEl">
+          <div class="ai-ring" id="aiRing1"></div>
+          <div class="ai-ring2" id="aiRing2"></div>
+          <svg viewBox="0 0 60 60" fill="none">
+            <circle cx="30" cy="22" r="10" fill="rgba(108,99,255,.6)"/>
+            <path d="M10 50c0-11 9-18 20-18s20 7 20 18" fill="rgba(108,99,255,.4)"/>
+            <circle cx="30" cy="22" r="4" fill="rgba(200,190,255,.8)"/>
+          </svg>
+        </div>
+        <div class="ai-name">Simran — AI Interviewer</div>
+        <div class="ai-status">
+          <div class="ai-status-dot" id="aiStatusDot"></div>
+          <span id="aiStatusTxt">Getting ready…</span>
+        </div>
+      </div>
+
+      <!-- AI speech bubble -->
+      <div class="speech-bubble" id="speechBubble" style="display:none"></div>
+      <div class="panel-label">Interviewer</div>
+
+      <!-- AI voice bars (animate when speaking) -->
+      <div class="ai-vol-bar" id="aiVolBar">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- User Panel -->
+    <div class="vid-panel" id="userPanel">
+      <div class="user-vid">
+        <video id="userVideo" autoplay muted playsinline></video>
+        <div class="cam-off" id="camOff">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M15 10l4.553-2.278A1 1 0 0121 8.67v6.66a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+            <line x1="2" y1="2" x2="22" y2="22" stroke-width="1.5"/>
+          </svg>
+          <span>Camera off</span>
+        </div>
+      </div>
+      <div class="panel-label">You</div>
+      <div class="vol-bar" id="userVolBar">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom panel -->
+  <div class="int-bottom">
+
+    <!-- Progress dots -->
+    <div class="q-track" id="qTrack"></div>
+
+    <!-- Current question -->
+    <div>
+      <div class="section-label">Current Question</div>
+      <div class="q-box" id="qBox">Generating your interview…</div>
+    </div>
+
+    <!-- Transcript -->
+    <div>
+      <div class="section-label">Your Answer <span class="live-badge" id="liveBadge" style="display:none">● LIVE</span></div>
+      <div class="transcript-box" id="transcriptBox" contenteditable="false" role="textbox" aria-label="Your answer" data-placeholder="Waiting for AI to finish speaking…"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="int-controls">
+      <button class="ctrl-btn" id="micBtn" onclick="toggleMic()" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+          <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        Start Speaking
+      </button>
+
+      <button class="ctrl-btn" id="camBtn" onclick="toggleCam()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 10l4.553-2.278A1 1 0 0121 8.67v6.66a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+        </svg>
+        Camera
+      </button>
+
+      <button class="ctrl-btn" id="skipBtn" onclick="skipQuestion()" style="display:none">
+        Skip Question
+      </button>
+
+      <button class="ctrl-btn primary-btn" id="submitBtn" onclick="submitAnswer()" style="display:none">
+        Submit Answer →
+      </button>
+    </div>
+
+    <div class="recording-loader" id="recordingLoader" style="display:none">
+      <div class="mini-spinner"></div>
+      <span>Converting audio to text…</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ANALYSIS SCREEN
+══════════════════════════════════════════ -->
+<div id="analysis" class="screen">
+  <div class="ana-wrap">
+
+    <div class="ana-header">
+      <div class="logo-dot"></div>
+      <div class="ana-title">Interview Complete</div>
+      <div class="ana-sub" id="anaSubtitle">Analyzing your performance…</div>
+    </div>
+
+    <div class="score-center">
+      <div class="score-ring-wrap">
+        <div class="score-ring">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="54"/>
+            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="54"/>
+          </svg>
+          <div class="score-num" id="overallScore">—</div>
+        </div>
+        <div class="score-label">Overall Score</div>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="analysisCards"></div>
+
+    <button class="btn-restart" onclick="restart()">← Start New Interview</button>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="spinner"></div>
+  <div id="loadingMsg">Preparing your interview…</div>
+</div>
+
+<script src="app.js"></script>
+<script type="module" src="/shared-shell.js"></script>
+</body>
+</html>

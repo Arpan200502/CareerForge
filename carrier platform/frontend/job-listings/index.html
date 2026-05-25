@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/job-listings/" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/shared-shell.css" />
+  <title>Job Listings - ResumeX</title>
+  <link rel="icon" href="./../resume-builder/public/favicon.png" />
+</head>
+<body>
+  <div class="jl-container">
+    <!-- LEFT: Resume + Filters -->
+    <aside class="jl-sidebar">
+      <div class="jl-sidebar-inner">
+        <!-- Resume Upload (for later resume generation) -->
+        <div class="jl-sidebar-section">
+          <h2>Your Resume</h2>
+          <div id="resumeStatus">
+            <div class="jl-upload-area" id="uploadArea">
+              <div class="jl-upload-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <p>Upload your resume (PDF)</p>
+              <input type="file" id="resumeUpload" accept=".pdf" />
+              <label for="resumeUpload" class="jl-upload-btn">Choose</label>
+            </div>
+            <div class="jl-resume-loaded" id="resumeLoaded" style="display:none;">
+              <div class="jl-resume-check">&#10003;</div>
+              <p>Resume stored</p>
+              <button class="jl-change-btn" id="changeResumeBtn">Change</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="jl-sidebar-section jl-filters-section">
+          <div class="jl-filters-header">
+            <h2>Filters</h2>
+            <button class="jl-clear-filters" id="clearFiltersBtn">Clear all</button>
+          </div>
+
+          <div class="jl-filter-group">
+            <label class="jl-filter-label">Job Title / Keyword</label>
+            <input type="text" id="filterTitle" class="jl-filter-input" placeholder="e.g. Java, MERN, software engineer" />
+          </div>
+
+          <div class="jl-filter-group">
+            <label class="jl-filter-label">Role</label>
+            <div id="filterKeywords" class="jl-checkbox-group">
+              <label class="jl-checkbox"><input type="checkbox" value="software engineer" /> Software Engineer</label>
+              <label class="jl-checkbox"><input type="checkbox" value="full stack developer" /> Full Stack Developer</label>
+              <label class="jl-checkbox"><input type="checkbox" value="backend developer" /> Backend Developer</label>
+              <label class="jl-checkbox"><input type="checkbox" value="frontend developer" /> Frontend Developer</label>
+              <label class="jl-checkbox"><input type="checkbox" value="internship" /> Internship</label>
+              <label class="jl-checkbox"><input type="checkbox" value="data scientist" /> Data Scientist</label>
+              <label class="jl-checkbox"><input type="checkbox" value="devops engineer" /> DevOps Engineer</label>
+              <label class="jl-checkbox"><input type="checkbox" value="web developer" /> Web Developer</label>
+            </div>
+          </div>
+
+          <div class="jl-filter-group">
+            <label class="jl-filter-label">Country</label>
+            <select id="filterCountry" class="jl-filter-select">
+              <option value="">All Countries</option>
+            </select>
+          </div>
+
+          <div class="jl-filter-group">
+            <label class="jl-filter-label">Location</label>
+            <input type="text" id="filterLocation" class="jl-filter-input" placeholder="e.g. Bangalore, Mumbai" />
+          </div>
+
+          <div class="jl-filter-row">
+            <div class="jl-filter-group jl-filter-half">
+              <label class="jl-filter-label">Experience</label>
+              <select id="filterExperience" class="jl-filter-select">
+                <option value="">All Levels</option>
+                <option value="entry">Entry</option>
+                <option value="mid">Mid</option>
+                <option value="senior">Senior</option>
+              </select>
+            </div>
+            <div class="jl-filter-group jl-filter-half">
+              <label class="jl-filter-label">Job Type</label>
+              <select id="filterJobType" class="jl-filter-select">
+                <option value="">All Types</option>
+                <option value="full-time">Full-time</option>
+                <option value="part-time">Part-time</option>
+                <option value="contract">Contract</option>
+                <option value="internship">Internship</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="jl-filter-group">
+            <label class="jl-filter-label">Remote</label>
+            <select id="filterRemote" class="jl-filter-select">
+              <option value="">All</option>
+              <option value="true">Remote Only</option>
+              <option value="false">On-site Only</option>
+            </select>
+          </div>
+
+          <div class="jl-filter-group">
+            <label class="jl-filter-label">Platform</label>
+            <div id="filterPlatforms" class="jl-checkbox-group">
+              <label class="jl-checkbox"><input type="checkbox" value="indeed" checked /> Indeed</label>
+              <label class="jl-checkbox"><input type="checkbox" value="linkedin" checked /> LinkedIn</label>
+              <label class="jl-checkbox"><input type="checkbox" value="zip_recruiter" checked /> ZipRecruiter</label>
+              <label class="jl-checkbox"><input type="checkbox" value="glassdoor" checked /> Glassdoor</label>
+              <label class="jl-checkbox"><input type="checkbox" value="google" checked /> Google</label>
+              <label class="jl-checkbox"><input type="checkbox" value="naukri" checked /> Naukri</label>
+              <label class="jl-checkbox"><input type="checkbox" value="bayt" checked /> Bayt</label>
+              <label class="jl-checkbox"><input type="checkbox" value="bdjobs" checked /> B DJobs</label>
+              <label class="jl-checkbox"><input type="checkbox" value="adzuna" checked /> Adzuna</label>
+            </div>
+          </div>
+
+          <div class="jl-filter-row">
+            <div class="jl-filter-group jl-filter-half">
+              <label class="jl-filter-label">Date Posted</label>
+              <select id="filterHoursOld" class="jl-filter-select">
+                <option value="24">24 hours</option>
+                <option value="72">3 days</option>
+                <option value="168">7 days</option>
+                <option value="" selected>Any time</option>
+              </select>
+            </div>
+            <div class="jl-filter-group jl-filter-half">
+              <label class="jl-filter-label">Results</label>
+              <select id="filterLimit" class="jl-filter-select">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200" selected>200</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="jl-apply-filters" id="applyFiltersBtn">Apply Filters</button>
+        </div>
+
+        <!-- Demo: Fetch New Jobs -->
+        <div class="jl-sidebar-section" style="border-top:1px solid rgba(148,163,184,0.08);padding-top:14px;">
+          <button class="jl-fetch-btn" id="fetchNewBtn">&#8635; Fetch New Jobs</button>
+          <p style="font-size:10px;color:#505d78;margin-top:6px;">Triggers a fresh scrape from all platforms (demo)</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Job Listings -->
+    <main class="jl-main">
+      <div class="jl-header">
+        <h1>Job Listings</h1>
+        <p>Browse the latest opportunities from our job database</p>
+        <div class="jl-header-actions">
+          <span class="jl-count" id="jobCount"></span>
+          <span class="jl-source-info" id="sourceInfo"></span>
+          <button class="jl-refresh-btn" id="refreshBtn">&#8635; Refresh</button>
+        </div>
+      </div>
+      <div class="jl-loading" id="loadingState">
+        <div class="jl-spinner"></div>
+        <p>Loading jobs...</p>
+      </div>
+      <div class="jl-empty" id="emptyState" style="display:none;">
+        <p>Apply filters to see available jobs.</p>
+      </div>
+      <div class="jl-grid" id="jobGrid"></div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="app.js"></script>
+  <script type="module" src="/shared-shell.js"></script>
+</body>
+</html>
