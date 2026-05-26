@@ -26,6 +26,21 @@
           <div class="pf-detail-row"><span class="pf-label">Role</span><span class="pf-value" id="pfRole">—</span></div>
         </div>
         <div class="pf-section">
+          <h3>Plan Dashboard</h3>
+          <div class="pf-plan-card">
+            <div class="pf-plan-row">
+              <span class="pf-plan-pill" id="pfPlanPill">Loading...</span>
+              <button class="pf-plan-btn" id="pfOpenPlanModalBtn" type="button">Change Plan</button>
+            </div>
+            <div class="pf-plan-note" id="pfPlanNote">Loading your current plan and usage.</div>
+            <div class="pf-plan-note" id="pfPlanSelectedAt"></div>
+            <div class="pf-usage-grid" id="pfUsageGrid"></div>
+            <div class="pf-plan-actions">
+              <button class="pf-plan-btn" id="pfRefreshPlanBtn" type="button">Refresh Usage</button>
+            </div>
+          </div>
+        </div>
+        <div class="pf-section">
           <h3>Saved Resumes <span class="pf-count" id="pfResumeCount"></span></h3>
           <div class="pf-upload-area">
             <input type="text" id="pfResumeTitle" class="pf-upload-input" placeholder="Resume title (e.g. Software Engineer Resume)" />

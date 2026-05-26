@@ -165,6 +165,162 @@ body.cf-shell-enabled {
   flex-wrap: wrap;
 }
 
+.cf-plan-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 15100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(4, 8, 18, 0.76);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.cf-plan-modal.open {
+  display: flex;
+}
+
+.cf-plan-modal-card {
+  width: min(960px, 96vw);
+  background: linear-gradient(160deg, rgba(13, 20, 37, 0.98), rgba(9, 14, 26, 0.99));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 20px;
+  color: var(--cf-shell-text);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
+}
+
+.cf-plan-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cf-plan-modal-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #57d6ff;
+  margin-bottom: 6px;
+}
+
+.cf-plan-modal-header h3 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.cf-plan-modal-copy {
+  margin: 10px 0 16px;
+  color: var(--cf-shell-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cf-plan-modal-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(148, 163, 184, 0.06);
+  color: var(--cf-shell-text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cf-plan-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cf-plan-tier {
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.04);
+}
+
+.cf-plan-tier-current {
+  border-color: rgba(87, 214, 255, 0.24);
+  background: rgba(87, 214, 255, 0.06);
+}
+
+.cf-plan-tier-muted {
+  opacity: 0.9;
+}
+
+.cf-plan-tier-name {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.cf-plan-tier-price {
+  font-size: 22px;
+  font-weight: 800;
+  color: #e2eaf8;
+  margin-bottom: 6px;
+}
+
+.cf-plan-tier-copy,
+.cf-plan-current-usage {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #a5afd3;
+}
+
+.cf-plan-current-usage {
+  margin-top: 8px;
+  color: #cbd5e1;
+}
+
+.cf-plan-usage-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.cf-plan-usage-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: #cbd5e1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.54);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.cf-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.cf-plan-payment-status {
+  min-height: 20px;
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.cf-plan-actions .cf-shell-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .cf-resume-source-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -390,6 +546,10 @@ body[data-cf-page="interviewer"] .screen {
 
 @media (max-width: 720px) {
   .cf-resume-source-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-plan-modal-grid {
     grid-template-columns: 1fr;
   }
 }

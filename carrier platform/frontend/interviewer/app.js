@@ -76,9 +76,10 @@ async function checkServerHealth() {
 
 // Generate interview questions via server
 async function generateInterviewQuestions(jobDesc, resumeText, intType, difficulty, totalQ) {
+  const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
   const resp = await fetch(`${SERVER_URL}/api/generate-questions`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify({
       jobDesc,
       resumeText,
@@ -87,6 +88,10 @@ async function generateInterviewQuestions(jobDesc, resumeText, intType, difficul
       totalQ,
     }),
   });
+
+  if (window.__handlePlanLimitResponse && await window.__handlePlanLimitResponse(resp, "Interview Prep", "interviewPrep")) {
+    return null;
+  }
 
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
@@ -806,6 +811,10 @@ async function startInterviewFromDeviceCheck() {
   try {
     // Call server to generate questions
     questions = await generateInterviewQuestions(jobDesc, resumeText, intType, difficulty, totalQ);
+    if (!questions) {
+      hideLoading();
+      return;
+    }
     totalQ = questions.length;
 
     const greeting = shadowMode ? "First question." : getFixedGreeting(totalQ);

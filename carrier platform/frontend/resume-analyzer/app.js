@@ -467,6 +467,10 @@ btn.onclick = async function () {
             },
           );
 
+          if (window.__handlePlanLimitResponse && await window.__handlePlanLimitResponse(response, "Resume Analysis", "resumeAnalysis")) {
+            return;
+          }
+
           const data = await response.json();
           const analysis = data.analysis;
           console.log("PARSED ANALYSIS:", analysis);
@@ -660,15 +664,24 @@ btn.onclick = async function () {
             trResult.style.display = "none";
 
             try {
+              const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
               const resp = await fetch("http://localhost:5000/generate-job-specific-resume", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...authHeaders },
                 body: JSON.stringify({
                   resumeText: lastResumeText,
                   jobDescription: lastJobDesc,
                   jobTitle: lastJobTitle,
                 }),
               });
+
+              if (window.__handlePlanLimitResponse && await window.__handlePlanLimitResponse(resp, "Job Fit Resume", "jobFitResume")) {
+                genBtn.disabled = false;
+                genBtn.textContent = "Generate Job Specific Resume";
+                trResult.style.display = "none";
+                return;
+              }
+
               const data = await resp.json();
               if (!data.success) throw new Error(data.error);
 

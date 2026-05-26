@@ -22,6 +22,9 @@ const InterviewRanking = require("./models/InterviewRanking");
 const classifyJobCategory = require("./utils/classifyJobCategory");
 const normalizeScore = require("./utils/normalizeScore");
 const leaderboardRouter = require("./routes/leaderboard");
+const plansRouter = require("./routes/plans");
+const paymentRouter = require("./routes/payment");
+const checkUsageLimit = require("./middleware/checkUsageLimit");
 
 // Force Google DNS for SRV lookups (Node.js c-ares has issues on some networks)
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
@@ -79,6 +82,27 @@ const profileSchema = new mongoose.Schema({
   firstName:  { type: String, default: "" },
   lastName:   { type: String, default: "" },
   role:       { type: String, enum: ["user", "admin"], default: "user" },
+  plan:       { type: String, enum: ["free", "pro", "max"], default: "free" },
+  hasChosenPlan: { type: Boolean, default: false },
+  planSelectedAt: { type: Date, default: null },
+  usageCounters: {
+    resumeAnalysis: {
+      count: { type: Number, default: 0 },
+      lastReset: { type: Date, default: Date.now },
+    },
+    jobFitResume: {
+      count: { type: Number, default: 0 },
+      lastReset: { type: Date, default: Date.now },
+    },
+    interviewPrep: {
+      count: { type: Number, default: 0 },
+      lastReset: { type: Date, default: Date.now },
+    },
+    coverLetter: {
+      count: { type: Number, default: 0 },
+      lastReset: { type: Date, default: Date.now },
+    },
+  },
   resumes:    [resumeSubSchema],
 }, { timestamps: true });
 profileSchema.index({ email: 1 });
@@ -1262,7 +1286,7 @@ app.post("/recompile-latex", async (req, res) => {
 });
 
 // POST /analyze-resume
-app.post("/analyze-resume", clerkAuthOptional, async (req, res) => {
+app.post("/analyze-resume", clerkAuthOptional, checkUsageLimit("resumeAnalysis"), async (req, res) => {
   try {
     const { prompt, jobTitle, jobDescription, resumeText } = req.body;
     if (!prompt) return res.status(400).json({ success: false, error: "Missing prompt" });
@@ -1318,7 +1342,7 @@ async function _saveResumeRanking(clerkId, score, jobTitle, jobDescription, resu
 }
 
 // POST /generate-job-specific-resume
-app.post("/generate-job-specific-resume", async (req, res) => {
+app.post("/generate-job-specific-resume", clerkAuth, checkUsageLimit("jobFitResume"), async (req, res) => {
   try {
     const { resumeText, jobDescription, jobTitle } = req.body;
     if (!resumeText || !jobDescription) {
@@ -1570,7 +1594,7 @@ app.post("/api/text-to-speech", async (req, res) => {
 });
 
 // POST /api/generate-questions
-app.post("/api/generate-questions", async (req, res) => {
+app.post("/api/generate-questions", clerkAuth, checkUsageLimit("interviewPrep"), async (req, res) => {
   try {
     const { jobDesc, resumeText, intType, difficulty, totalQ } = req.body;
     const prompt =
@@ -1791,7 +1815,7 @@ app.post("/api/match-jobs", async (req, res) => {
 });
 
 // POST /api/generate-cover-letter
-app.post("/api/generate-cover-letter", async (req, res) => {
+app.post("/api/generate-cover-letter", clerkAuth, checkUsageLimit("coverLetter"), async (req, res) => {
   try {
     const { resumeText, jobDescription, jobTitle } = req.body;
     if (!resumeText || !jobDescription) {
@@ -1872,6 +1896,12 @@ app.get("/api/jobs/filters", async (req, res) => {
 
 // Leaderboard routes
 app.use("/api/leaderboard", leaderboardRouter);
+
+// Plans routes
+app.use("/api/plans", plansRouter);
+
+// Payment routes
+app.use("/api/payment", paymentRouter);
 
 // Health check
 app.get("/api/health", (req, res) => {

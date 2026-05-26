@@ -1,5 +1,66 @@
 const SERVER_URL = window.__SERVER_URL || "http://localhost:5000";
 
+function formatPlanLabel(plan) {
+  return (plan || "free").charAt(0).toUpperCase() + (plan || "free").slice(1);
+}
+
+function featureLabel(featureKey) {
+  const labels = {
+    resumeAnalysis: "Resume Analysis",
+    jobFitResume: "Job Fit Resume",
+    interviewPrep: "Interview Prep",
+    coverLetter: "Cover Letter",
+  };
+  return labels[featureKey] || featureKey;
+}
+
+function renderPlanDashboard(profile, usageData) {
+  const plan = usageData?.plan || profile.plan || "free";
+  const usageCounters = usageData?.usageCounters || profile.usageCounters || {};
+  const limits = usageData?.limits || {};
+
+  document.getElementById("pfPlanPill").textContent = formatPlanLabel(plan);
+
+  const noteParts = [];
+  noteParts.push(usageData?.hasChosenPlan ? "Plan selected" : "Default plan");
+  if (plan === "free") noteParts.push("Free tier active");
+  document.getElementById("pfPlanNote").textContent = noteParts.join(" • ");
+
+  const selectedAt = usageData?.planSelectedAt || profile.planSelectedAt;
+  document.getElementById("pfPlanSelectedAt").textContent = selectedAt
+    ? `Selected on ${new Date(selectedAt).toLocaleString()}`
+    : "No plan selection recorded yet.";
+
+  const order = ["resumeAnalysis", "jobFitResume", "interviewPrep", "coverLetter"];
+  const usageGrid = document.getElementById("pfUsageGrid");
+  usageGrid.innerHTML = order.map((key) => {
+    const item = usageCounters[key] || { count: 0 };
+    const limit = limits[key];
+    const safeLimit = limit === Infinity ? null : Number(limit || 0);
+    const count = Number(item.count || 0);
+    const pct = safeLimit ? Math.min((count / safeLimit) * 100, 100) : 100;
+    return `
+      <div class="pf-usage-item">
+        <div class="pf-usage-top">
+          <span>${featureLabel(key)}</span>
+          <span>${count}/${safeLimit === null ? "∞" : safeLimit}</span>
+        </div>
+        <div class="pf-usage-track"><div class="pf-usage-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function refreshPlanDashboard(profile) {
+  try {
+    const usage = await window.__loadPlanUsage?.();
+    renderPlanDashboard(profile, usage || null);
+  } catch (err) {
+    console.warn("[Profile] Plan usage load failed:", err.message);
+    renderPlanDashboard(profile, null);
+  }
+}
+
 async function loadProfile() {
   const headers = await window.__getAuthHeaders();
   if (!headers.Authorization) {
@@ -78,6 +139,7 @@ function renderProfile(profile) {
 
   document.getElementById("pfResumeCount").textContent = profile.resumes && profile.resumes.length > 0 ? `(${profile.resumes.length})` : "";
   renderResumeList(profile.resumes || []);
+  refreshPlanDashboard(profile);
 }
 
 function renderResumeList(resumes) {
@@ -225,3 +287,15 @@ document.getElementById("pfUploadBtn").addEventListener("click", async () => {
   await window.__clerkReady;
   await loadProfile();
 })();
+
+document.getElementById("pfOpenPlanModalBtn")?.addEventListener("click", async () => {
+  await window.__openPlanSelectionModal?.({ reason: "dashboard" });
+});
+
+document.getElementById("pfRefreshPlanBtn")?.addEventListener("click", async () => {
+  await loadProfile();
+});
+
+window.__refreshPlanDashboard = async () => {
+  await loadProfile();
+};

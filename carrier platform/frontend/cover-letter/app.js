@@ -142,15 +142,23 @@ async function generateCoverLetter() {
   loading.style.display = "block";
 
   try {
+    const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
     const resp = await fetch(`${SERVER_URL}/api/generate-cover-letter`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({
         resumeText,
         jobDescription: desc,
         jobTitle: title || undefined,
       }),
     });
+
+    if (window.__handlePlanLimitResponse && await window.__handlePlanLimitResponse(resp, "Cover Letter", "coverLetter")) {
+      loading.style.display = "none";
+      setup.style.display = "block";
+      return;
+    }
+
     const data = await resp.json();
     if (!data.success) throw new Error(data.error || "Generation failed");
 
