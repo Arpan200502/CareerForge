@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard - ResumeX</title>
+  <link rel="icon" href="/public/favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/shared-shell.css" />
+  <script>
+    window.__clerkReady = new Promise(function (resolve) {
+      window.__resolveClerkReady = resolve;
+    });
+  </script>
+</head>
+<body>
+  <div class="lb-container">
+    <!-- Header -->
+    <div class="lb-header">
+      <div class="lb-header-icon">🏆</div>
+      <div>
+        <h1 class="lb-title">Leaderboard</h1>
+        <p class="lb-subtitle">Top performers across all categories</p>
+      </div>
+    </div>
+
+    <!-- Your Rankings -->
+    <div class="lb-my-rankings" id="lbMyRankings" style="display:none;">
+      <h2 class="lb-section-title">Your Rankings</h2>
+      <div class="lb-my-cards" id="lbMyCards"></div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="lb-tabs-wrapper">
+      <div class="lb-tabs" id="lbTabs"></div>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div class="lb-skeleton" id="lbSkeleton">
+      <div class="sk-shimmer sk-title"></div>
+      <div class="sk-shimmer sk-row"></div>
+      <div class="sk-shimmer sk-row"></div>
+      <div class="sk-shimmer sk-row"></div>
+      <div class="sk-shimmer sk-row"></div>
+      <div class="sk-shimmer sk-row"></div>
+    </div>
+
+    <!-- Tables -->
+    <div class="lb-tables" id="lbTables" style="display:none;">
+      <!-- Resume Leaderboard -->
+      <div class="lb-table-card">
+        <h3 class="lb-table-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Resume Rankings
+        </h3>
+        <div class="lb-empty" id="lbResumeEmpty" style="display:none;">No rankings yet for this category — be the first!</div>
+        <div class="lb-table-wrap" id="lbResumeWrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th class="col-rank">#</th>
+                <th class="col-name">Name</th>
+                <th class="col-score">Score</th>
+                <th class="col-title">Job Title</th>
+                <th class="col-date">Date</th>
+              </tr>
+            </thead>
+            <tbody id="lbResumeBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Interview Leaderboard -->
+      <div class="lb-table-card">
+        <h3 class="lb-table-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Interview Rankings
+        </h3>
+        <div class="lb-empty" id="lbInterviewEmpty" style="display:none;">No rankings yet for this category — be the first!</div>
+        <div class="lb-table-wrap" id="lbInterviewWrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th class="col-rank">#</th>
+                <th class="col-name">Name</th>
+                <th class="col-score">Score</th>
+                <th class="col-title">Role</th>
+                <th class="col-type">Type</th>
+                <th class="col-diff">Difficulty</th>
+                <th class="col-date">Date</th>
+              </tr>
+            </thead>
+            <tbody id="lbInterviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script type="module" src="/shared-shell.js"></script>
+</body>
+</html>

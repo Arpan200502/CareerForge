@@ -140,10 +140,11 @@ async function generateShadowModeAssets(questions, jobDesc, resumeText, intType,
 }
 
 // Analyze interview via server
-async function analyzeInterview(questions, answers, jobDesc, resumeText, intType, difficulty) {
+async function analyzeInterview(questions, answers, jobDesc, resumeText, intType, difficulty, jobTitle) {
+  const authHeaders = await window.__getAuthHeaders();
   const resp = await fetch(`${SERVER_URL}/api/analyze-interview`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify({
       questions,
       answers,
@@ -151,6 +152,7 @@ async function analyzeInterview(questions, answers, jobDesc, resumeText, intType
       resumeText,
       intType,
       difficulty,
+      jobTitle,
     }),
   });
 
@@ -1391,7 +1393,8 @@ async function showAnalysis() {
   let data = null;
   try {
     // Call server to analyze interview
-    data = await analyzeInterview(questions, answers, jobDesc, resumeText, intType, difficulty);
+    const _authHeaders = await window.__getAuthHeaders();
+    data = await analyzeInterview(questions, answers, jobDesc, resumeText, intType, difficulty, "");
   } catch (e) {
     console.warn("Analysis error:", e.message);
     // Fallback data if analysis fails

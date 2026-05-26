@@ -16,6 +16,13 @@ const cron = require("node-cron");
 
 require("dotenv").config();
 
+// Ranking models & utilities
+const ResumeRanking = require("./models/ResumeRanking");
+const InterviewRanking = require("./models/InterviewRanking");
+const classifyJobCategory = require("./utils/classifyJobCategory");
+const normalizeScore = require("./utils/normalizeScore");
+const leaderboardRouter = require("./routes/leaderboard");
+
 // Force Google DNS for SRV lookups (Node.js c-ares has issues on some networks)
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
@@ -1255,19 +1262,60 @@ app.post("/recompile-latex", async (req, res) => {
 });
 
 // POST /analyze-resume
-app.post("/analyze-resume", async (req, res) => {
+app.post("/analyze-resume", clerkAuthOptional, async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, jobTitle, jobDescription, resumeText } = req.body;
     if (!prompt) return res.status(400).json({ success: false, error: "Missing prompt" });
     const raw = await callGroqAI(prompt, "Return only valid JSON. No markdown.");
     const jsonText = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
     const analysis = JSON.parse(jsonText);
+
+    // Fire-and-forget ranking save (non-blocking, never breaks main response)
+    if (req.auth && req.auth.userId) {
+      _saveResumeRanking(req.auth.userId, analysis.overallScore, jobTitle, jobDescription, resumeText).catch(err => {
+        console.error("Resume ranking save failed (non-fatal):", err.message);
+      });
+    }
+
     res.json({ success: true, analysis });
   } catch (error) {
     console.error("Analyze Resume Error:", error);
     res.status(500).json({ success: false, error: "Analysis failed" });
   }
 });
+
+async function _saveResumeRanking(clerkId, score, jobTitle, jobDescription, resumeText) {
+  if (score === null || score === undefined || isNaN(Number(score))) {
+    console.warn("[Ranking] Resume score is invalid, skipping");
+    return;
+  }
+  const normalized = normalizeScore(Number(score));
+  if (normalized === null) return;
+
+  const category = await classifyJobCategory(jobTitle || "", jobDescription || "");
+  const profile = await Profile.findOne({ clerkId });
+  if (!profile) return;
+
+  const userName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim() || "Anonymous";
+  const resumeSnapshot = (resumeText || "").slice(0, 500);
+
+  const existing = await ResumeRanking.findOne({ userId: profile._id, category });
+  if (!existing || normalized > existing.resumeScore) {
+    await ResumeRanking.findOneAndUpdate(
+      { userId: profile._id, category },
+      {
+        userId: profile._id,
+        userName,
+        category,
+        resumeScore: normalized,
+        jobTitle: jobTitle || "",
+        analyzedAt: new Date(),
+        resumeSnapshot,
+      },
+      { upsert: true, new: true }
+    );
+  }
+}
 
 // POST /generate-job-specific-resume
 app.post("/generate-job-specific-resume", async (req, res) => {
@@ -1567,9 +1615,9 @@ app.post("/api/generate-audios", async (req, res) => {
 });
 
 // POST /api/analyze-interview
-app.post("/api/analyze-interview", async (req, res) => {
+app.post("/api/analyze-interview", clerkAuthOptional, async (req, res) => {
   try {
-    const { questions, answers, jobDesc, resumeText, intType, difficulty } = req.body;
+    const { questions, answers, jobDesc, resumeText, intType, difficulty, jobTitle } = req.body;
     const qaText = questions.map((q, i) => `Q${i + 1}: ${q}\nA${i + 1}: ${answers[i] || "(no answer)"}`).join("\n\n");
     const prompt =
       `Job Description:\n${(jobDesc || "").slice(0, 2000)}\n\n` +
@@ -1587,12 +1635,53 @@ app.post("/api/analyze-interview", async (req, res) => {
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON object in response");
     const analysis = JSON.parse(match[0]);
+
+    // Fire-and-forget interview ranking save
+    if (req.auth && req.auth.userId) {
+      _saveInterviewRanking(req.auth.userId, analysis.overallScore, jobTitle, jobDesc, resumeText, intType, difficulty).catch(err => {
+        console.error("Interview ranking save failed (non-fatal):", err.message);
+      });
+    }
+
     res.json({ success: true, analysis });
   } catch (error) {
     console.error("Analyze Interview Error:", error);
     res.status(500).json({ error: error.message });
   }
 });
+
+async function _saveInterviewRanking(clerkId, score, jobTitle, jobDescription, resumeText, intType, difficulty) {
+  if (score === null || score === undefined || isNaN(Number(score))) {
+    console.warn("[Ranking] Interview score is invalid, skipping");
+    return;
+  }
+  const normalized = normalizeScore(Number(score));
+  if (normalized === null) return;
+
+  const category = await classifyJobCategory(jobTitle || "", jobDescription || "");
+  const profile = await Profile.findOne({ clerkId });
+  if (!profile) return;
+
+  const userName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim() || "Anonymous";
+
+  const existing = await InterviewRanking.findOne({ userId: profile._id, category });
+  if (!existing || normalized > existing.interviewScore) {
+    await InterviewRanking.findOneAndUpdate(
+      { userId: profile._id, category },
+      {
+        userId: profile._id,
+        userName,
+        category,
+        interviewScore: normalized,
+        jobTitle: jobTitle || "",
+        interviewType: intType || "",
+        difficulty: difficulty || "",
+        completedAt: new Date(),
+      },
+      { upsert: true, new: true }
+    );
+  }
+}
 
 // POST /api/speech-to-text
 app.post("/api/speech-to-text", upload.single("file"), async (req, res) => {
@@ -1780,6 +1869,9 @@ app.get("/api/jobs/filters", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// Leaderboard routes
+app.use("/api/leaderboard", leaderboardRouter);
 
 // Health check
 app.get("/api/health", (req, res) => {

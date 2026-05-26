@@ -10,6 +10,7 @@ const links = [
   { href: '/cover-letter/', label: 'Cover Letter', key: 'cover-letter' },
   { href: '/interviewer/', label: 'Interviewer', key: 'interviewer' },
   { href: '/job-listings/', label: 'Job Listings', key: 'job-listings' },
+  { href: '/leaderboard/', label: 'Leaderboard', key: 'leaderboard' },
 ];
 
 let clerk = null;
@@ -118,7 +119,7 @@ function isFeaturePath(pathname) {
 
 function detectPageKey() {
   const first = window.location.pathname.split('/').filter(Boolean)[0] || 'index.html';
-  if (first === 'resume-builder' || first === 'resume-analyzer' || first === 'cover-letter' || first === 'interviewer' || first === 'profile') {
+  if (first === 'resume-builder' || first === 'resume-analyzer' || first === 'cover-letter' || first === 'interviewer' || first === 'profile' || first === 'leaderboard') {
     return first;
   }
   return 'home';

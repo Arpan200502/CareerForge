@@ -456,9 +456,13 @@ btn.onclick = async function () {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                ...(await window.__getAuthHeaders()),
               },
               body: JSON.stringify({
                 prompt: prompt,
+                jobTitle: lastJobTitle,
+                jobDescription: lastJobDesc,
+                resumeText: cleanText,
               }),
             },
           );
@@ -735,11 +739,22 @@ if (pdf) {
   pdf.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-      activeResumeBlob = file;
-    pdfSourceStatus.textContent = `Using uploaded resume: ${file.name}`;
+    activeResumeBlob = file;
+    pdfSourceStatus.textContent = `Reading ${file.name}...`;
     savedResumeSelect.value = "";
     savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
     savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+
+    try {
+      lastResumeText = await extractPdfText(file);
+      const charCount = document.getElementById("pdfChars");
+      if (charCount) charCount.textContent = `(${lastResumeText.length.toLocaleString()} chars extracted)`;
+      pdfSourceStatus.textContent = `Using uploaded resume: ${file.name}`;
+      activeResumeSource = "upload";
+    } catch (err) {
+      pdfSourceStatus.textContent = "Could not read PDF. Try a different file.";
+      lastResumeText = "";
+    }
   });
 }
 
