@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/profile/" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/shared-shell.css" />
+  <title>Profile - ResumeX</title>
+  <link rel="icon" href="./../resume-builder/public/favicon.png" />
+</head>
+<body>
+  <div class="pf-container">
+    <div class="pf-card">
+      <div class="pf-header">
+        <div class="pf-avatar" id="pfAvatar"></div>
+        <h1 id="pfName">Loading...</h1>
+        <p id="pfEmail"></p>
+        <span class="pf-role-badge" id="pfRoleBadge" style="display:none;"></span>
+      </div>
+      <div class="pf-body">
+        <div class="pf-section">
+          <h3>Account Details</h3>
+          <div class="pf-detail-row"><span class="pf-label">Username</span><span class="pf-value" id="pfUsername">—</span></div>
+          <div class="pf-detail-row"><span class="pf-label">Email</span><span class="pf-value" id="pfEmailDetail">—</span></div>
+          <div class="pf-detail-row"><span class="pf-label">Role</span><span class="pf-value" id="pfRole">—</span></div>
+        </div>
+        <div class="pf-section">
+          <h3>Saved Resumes <span class="pf-count" id="pfResumeCount"></span></h3>
+          <div class="pf-upload-area">
+            <input type="text" id="pfResumeTitle" class="pf-upload-input" placeholder="Resume title (e.g. Software Engineer Resume)" />
+            <div class="pf-upload-row">
+              <input type="file" id="pfResumeFile" accept=".pdf" hidden />
+              <button class="pf-upload-btn" id="pfChooseBtn">Choose PDF</button>
+              <span class="pf-file-name" id="pfFileName">No file chosen</span>
+              <button class="pf-upload-submit" id="pfUploadBtn" disabled>Upload</button>
+            </div>
+            <div class="pf-upload-status" id="pfUploadStatus"></div>
+          </div>
+          <div id="pfResumeList"><p class="pf-empty">No saved resumes yet.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>window.__clerkReady = new Promise(function(r){window.__resolveClerkReady=r;});</script>
+  <script type="module" src="/shared-shell.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

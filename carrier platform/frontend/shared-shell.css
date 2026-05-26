@@ -99,6 +99,26 @@ body.cf-shell-enabled {
   background: rgba(87, 214, 255, 0.22);
 }
 
+.cf-shell-profile-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cf-shell-text);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  transition: all 0.18s ease;
+}
+
+.cf-shell-profile-link:hover {
+  background: rgba(87, 214, 255, 0.12);
+  border-color: rgba(87, 214, 255, 0.35);
+}
+
 .cf-feature-gate {
   position: fixed;
   inset: 0;
@@ -143,6 +163,153 @@ body.cf-shell-enabled {
   justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.cf-resume-source-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cf-resume-source-card {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(148, 163, 184, 0.03);
+}
+
+.cf-resume-source-title {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cf-shell-text);
+  letter-spacing: 0.02em;
+}
+
+.cf-resume-source-note,
+.cf-resume-source-status {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--cf-shell-text-muted);
+}
+
+.cf-resume-source-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(148, 163, 184, 0.06);
+  color: var(--cf-shell-text);
+  font-size: 13px;
+  outline: none;
+}
+
+.cf-resume-source-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cf-resume-source-select option {
+  background: #0d1424;
+  color: #e2eaf8;
+}
+
+.rs-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(148,163,184,0.1);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rs-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.rs-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #52525b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rs-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(148,163,184,0.12);
+  flex-shrink: 0;
+}
+
+.rs-select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: 5px;
+  border: 1px solid rgba(148,163,184,0.12);
+  background: rgba(148,163,184,0.05);
+  color: #e2eaf8;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.rs-select option { background: #0d1424; }
+
+.rs-status {
+  font-size: 10px;
+  color: #52525b;
+  line-height: 1.3;
+  min-height: 0;
+}
+
+.rs-change {
+  background: transparent;
+  border: 1px solid rgba(148,163,184,0.15);
+  color: #6b7280;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+input[type="file"].rs-file,
+.rs-item input[type="file"] {
+  font-size: 10px;
+  color: #6b7280;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.rs-item input[type="file"]::file-selector-button {
+  padding: 3px 8px;
+  font-size: 10px;
+  margin-right: 6px;
+  border-radius: 4px;
+  background: rgba(124,58,237,0.7);
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
 /* Prevent duplicate navbars from older page templates */
@@ -218,5 +385,11 @@ body[data-cf-page="interviewer"] .screen {
   body[data-cf-page="resume-builder"] .container,
   body[data-cf-page="resume-analyzer"] .main-container {
     max-height: calc(100dvh - 132px);
+  }
+}
+
+@media (max-width: 720px) {
+  .cf-resume-source-grid {
+    grid-template-columns: 1fr;
   }
 }

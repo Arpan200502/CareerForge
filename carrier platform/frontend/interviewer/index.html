@@ -32,23 +32,38 @@
 
     <!-- Resume PDF Upload -->
     <div class="field">
-      <label>Resume (PDF)</label>
-      <div class="pdf-drop" id="pdfDrop" onclick="document.getElementById('pdfInput').click()">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="drop-icon">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-          <polyline points="14,2 14,8 20,8"/>
-          <line x1="12" y1="12" x2="12" y2="18"/>
-          <line x1="9" y1="15" x2="15" y2="15"/>
-        </svg>
-        <span class="drop-text" id="dropText">Click to upload PDF resume</span>
-        <span class="drop-sub">or drag and drop</span>
-      </div>
-      <input type="file" id="pdfInput" accept=".pdf" onchange="handlePdfUpload(event)">
-      <div class="pdf-preview" id="pdfPreview" style="display:none">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
-        <span id="pdfName"></span>
-        <span class="pdf-chars" id="pdfChars"></span>
-        <button class="pdf-clear" onclick="clearPdf()">×</button>
+      <label>Resume Source</label>
+      <div class="cf-resume-source-grid">
+        <div class="cf-resume-source-card">
+          <div class="cf-resume-source-title">Upload a new resume</div>
+          <div class="pdf-drop" id="pdfDrop" onclick="document.getElementById('pdfInput').click()">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="drop-icon">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="12" y1="12" x2="12" y2="18"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            <span class="drop-text" id="dropText">Click to upload PDF resume</span>
+            <span class="drop-sub">or drag and drop</span>
+          </div>
+          <input type="file" id="pdfInput" accept=".pdf" onchange="handlePdfUpload(event)">
+          <div class="pdf-preview" id="pdfPreview" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+            <span id="pdfName"></span>
+            <span class="pdf-chars" id="pdfChars"></span>
+            <button class="pdf-clear" onclick="clearPdf()">×</button>
+          </div>
+          <div class="cf-resume-source-note">Temporary for this page only. It is not saved to your Profile.</div>
+        </div>
+
+        <div class="cf-resume-source-card">
+          <div class="cf-resume-source-title">Choose from saved resumes</div>
+          <select id="savedResumeSelect" class="cf-resume-source-select">
+            <option value="">Loading saved resumes...</option>
+          </select>
+          <div class="cf-resume-source-status" id="savedResumeStatus">Loading your saved resumes...</div>
+          <div class="cf-resume-source-note" id="savedResumeHint">Select a saved resume from your Profile.</div>
+        </div>
       </div>
     </div>
 

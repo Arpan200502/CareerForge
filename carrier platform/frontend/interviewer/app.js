@@ -37,6 +37,7 @@ let selectedCameraId = "";
 let selectedMicId    = "";
 let playbackPhase    = "idle";
 let activePlaybackAudio = null;
+let activeResumeSource = "";
 
 // Device check state
 let deviceCamStream      = null;
@@ -220,25 +221,46 @@ async function speechToTextServer(audioBase64) {
 async function handlePdfUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-  await parsePdf(file);
+  await parseUploadedResume(file);
 }
 
-async function parsePdf(file) {
+async function waitForResumeHelpers() {
+  for (let i = 0; i < 80; i++) {
+    if (window.__getSavedResumes && window.__loadSavedResumePdf && window.__readPdfText) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error("Resume helpers not ready");
+}
+
+async function extractPdfText(source, includeLinks = false) {
+  await waitForResumeHelpers();
+  const rawText = await window.__readPdfText(source, { includeLinks });
+  return rawText.replace(/\s+/g, " ").trim();
+}
+
+function showUploadResumeState(label) {
+  document.getElementById("pdfName").textContent  = label;
+  document.getElementById("pdfPreview").style.display = "flex";
+  document.getElementById("dropText").textContent = "Resume uploaded ✓";
+  document.getElementById("savedResumeSelect").value = "";
+  document.getElementById("savedResumeStatus").textContent = "Pick a saved resume to use it instead of the uploaded file.";
+  document.getElementById("savedResumeHint").textContent = "Read-only selection. Nothing is written back to your Profile.";
+  activeResumeSource = "upload";
+}
+
+function clearUploadResumeState() {
+  document.getElementById("pdfInput").value     = "";
+  document.getElementById("pdfPreview").style.display = "none";
+  document.getElementById("dropText").textContent    = "Click to upload PDF resume";
+  activeResumeSource = "";
+}
+
+async function parseUploadedResume(file) {
   showLoading("Reading your resume…");
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf         = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let text = "";
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page    = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      text += content.items.map(item => item.str).join(" ") + "\n";
-    }
-    resumeText = text.trim();
-    document.getElementById("pdfName").textContent  = file.name;
+    resumeText = await extractPdfText(file, false);
     document.getElementById("pdfChars").textContent = `(${resumeText.length.toLocaleString()} chars extracted)`;
-    document.getElementById("pdfPreview").style.display = "flex";
-    document.getElementById("dropText").textContent = "Resume uploaded ✓";
+    showUploadResumeState(file.name || "Uploaded resume");
     hideLoading();
   } catch (e) {
     hideLoading();
@@ -248,9 +270,79 @@ async function parsePdf(file) {
 
 function clearPdf() {
   resumeText = "";
-  document.getElementById("pdfInput").value     = "";
-  document.getElementById("pdfPreview").style.display = "none";
-  document.getElementById("dropText").textContent    = "Click to upload PDF resume";
+  clearUploadResumeState();
+}
+
+async function loadSavedResumes() {
+  await waitForResumeHelpers();
+  const select = document.getElementById("savedResumeSelect");
+  const status = document.getElementById("savedResumeStatus");
+  const hint = document.getElementById("savedResumeHint");
+  const resumes = await window.__getSavedResumes();
+
+  select.innerHTML = "";
+  if (!resumes.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No saved resumes yet";
+    select.appendChild(option);
+    select.disabled = true;
+    status.textContent = "No saved resumes yet.";
+    hint.textContent = "Go to your Profile to save a resume, then return here.";
+    return;
+  }
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select a saved resume";
+  select.appendChild(placeholder);
+
+  resumes.forEach((resume) => {
+    const option = document.createElement("option");
+    option.value = resume._id;
+    option.textContent = resume.title || "Untitled Resume";
+    select.appendChild(option);
+  });
+
+  select.disabled = false;
+  status.textContent = "Pick one of your saved resumes.";
+  hint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+}
+
+async function useSavedResume(resumeId) {
+  const select = document.getElementById("savedResumeSelect");
+  const status = document.getElementById("savedResumeStatus");
+  const hint = document.getElementById("savedResumeHint");
+
+  if (!resumeId) {
+    if (!activeResumeSource || activeResumeSource === "saved") {
+      resumeText = "";
+      activeResumeSource = "";
+    }
+    status.textContent = hint.textContent || "Select a saved resume from your Profile.";
+    return;
+  }
+
+  await waitForResumeHelpers();
+  status.textContent = "Loading saved resume...";
+  const resumes = await window.__getSavedResumes();
+  const selected = resumes.find((resume) => resume._id === resumeId);
+  const blob = await window.__loadSavedResumePdf(resumeId);
+  showLoading("Reading your saved resume…");
+  try {
+    resumeText = await extractPdfText(blob, false);
+    document.getElementById("pdfChars").textContent = `(${resumeText.length.toLocaleString()} chars extracted)`;
+    clearUploadResumeState();
+    select.value = resumeId;
+    document.getElementById("savedResumeStatus").textContent = `Using ${selected?.title || "the selected saved resume"}.`;
+    document.getElementById("savedResumeHint").textContent = "Read-only selection. Nothing is written back to your Profile.";
+    activeResumeSource = "saved";
+    hideLoading();
+    return;
+  } catch (err) {
+    hideLoading();
+    throw err;
+  }
 }
 
 // Drag and drop
@@ -269,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (prefillResumeText) {
     resumeText = prefillResumeText;
+    activeResumeSource = "session";
     document.getElementById("pdfName").textContent = "From Job Listings";
     document.getElementById("pdfChars").textContent = `(${resumeText.length.toLocaleString()} chars)`;
     document.getElementById("pdfPreview").style.display = "flex";
@@ -308,6 +401,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (shadowToggle) {
     shadowToggle.addEventListener("change", (e) => {
       shadowMode = e.target.checked;
+    });
+  }
+
+  const savedResumeSelect = document.getElementById("savedResumeSelect");
+  if (savedResumeSelect) {
+    savedResumeSelect.addEventListener("change", async (e) => {
+      try {
+        await useSavedResume(e.target.value);
+      } catch (err) {
+        document.getElementById("savedResumeStatus").textContent = "Could not load selected resume.";
+        alert("Error loading saved resume: " + err.message);
+      }
     });
   }
 });
@@ -1445,3 +1550,14 @@ function restart() {
   document.getElementById("analysisCards").innerHTML = "";
   showScreen("setup");
 }
+
+(async function initSavedResumePicker() {
+  try {
+    await loadSavedResumes();
+  } catch (err) {
+    const status = document.getElementById("savedResumeStatus");
+    const hint = document.getElementById("savedResumeHint");
+    if (status) status.textContent = "Unable to load saved resumes.";
+    if (hint) hint.textContent = err.message;
+  }
+})();

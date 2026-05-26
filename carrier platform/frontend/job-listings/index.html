@@ -18,22 +18,26 @@
         <div class="jl-sidebar-section">
           <h2>Your Resume</h2>
           <div id="resumeStatus">
-            <div class="jl-upload-area" id="uploadArea">
-              <div class="jl-upload-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
+            <div class="rs-box">
+              <div class="rs-row">
+                <div class="rs-item">
+                  <span class="rs-label">Upload</span>
+                  <input type="file" id="resumeUpload" accept=".pdf" />
+                  <div id="resumeLoaded" style="display:none;">
+                    <span id="resumeLoadedLabel" style="font-size:10px;color:#a78bfa;"></span>
+                    <button class="rs-change" id="changeResumeBtn">Change</button>
+                  </div>
+                </div>
+                <div class="rs-divider"></div>
+                <div class="rs-item">
+                  <span class="rs-label">Saved</span>
+                  <select id="jlSavedResumeSelect" class="rs-select">
+                    <option value="">Loading...</option>
+                  </select>
+                </div>
               </div>
-              <p>Upload your resume (PDF)</p>
-              <input type="file" id="resumeUpload" accept=".pdf" />
-              <label for="resumeUpload" class="jl-upload-btn">Choose</label>
-            </div>
-            <div class="jl-resume-loaded" id="resumeLoaded" style="display:none;">
-              <div class="jl-resume-check">&#10003;</div>
-              <p>Resume stored</p>
-              <button class="jl-change-btn" id="changeResumeBtn">Change</button>
+              <div class="rs-status" id="jlSavedResumeStatus"></div>
+              <div style="display:none" id="jlSavedResumeHint"></div>
             </div>
           </div>
         </div>
@@ -173,6 +177,7 @@
         <p>Apply filters to see available jobs.</p>
       </div>
       <div class="jl-grid" id="jobGrid"></div>
+      <div class="jl-pagination" id="pagination" style="display:none;"></div>
     </main>
   </div>
 

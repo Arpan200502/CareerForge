@@ -94,6 +94,7 @@ def fetch_adzuna(search_term, location, app_id, api_key, max_results=50):
                     "what": search_term,
                     "where": city or location,
                     "content-type": "application/json",
+                    "max_days_old": 7,
                 },
                 timeout=15,
             )

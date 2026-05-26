@@ -1,6 +1,7 @@
 import { Clerk } from '/node_modules/@clerk/clerk-js/dist/clerk.mjs';
 
 const CLERK_PUBLISHABLE_KEY = 'pk_test_dGlkeS1hcmFjaG5pZC04Ni5jbGVyay5hY2NvdW50cy5kZXYk';
+window.__SERVER_URL = 'http://localhost:5000';
 
 const links = [
   { href: '/index.html', label: 'Home', key: 'home' },
@@ -14,7 +15,102 @@ const links = [
 let clerk = null;
 let pendingFeaturePath = null;
 
-const featurePathPrefixes = ['/resume-builder', '/resume-analyzer', '/cover-letter', '/interviewer', '/job-listings'];
+// Global auth helpers for feature pages
+window.__getAuthToken = async () => {
+  for (let i = 0; i < 50; i++) {
+    if (clerk && clerk.isSignedIn) {
+      try {
+        const token = await clerk.session.getToken();
+        if (token) return token;
+      } catch (e) {
+        console.warn("[Auth] getToken attempt", i, e.message);
+      }
+    }
+    await new Promise(r => setTimeout(r, 200));
+  }
+  console.warn("[Auth] Timed out waiting for session token");
+  return null;
+};
+window.__getAuthHeaders = async () => {
+  for (let i = 0; i < 50; i++) {
+    if (clerk && clerk.isSignedIn) {
+      try {
+        const token = await clerk.session.getToken();
+        if (token) return { Authorization: `Bearer ${token}` };
+      } catch (e) {
+        console.warn("[Auth] getToken attempt", i, e.message);
+      }
+    }
+    await new Promise(r => setTimeout(r, 200));
+  }
+  console.warn("[Auth] Timed out waiting for session token");
+  return {};
+};
+window.__getClerkUser = () => {
+  if (!clerk || !clerk.isSignedIn || !clerk.user) return null;
+  const primaryEmail = clerk.user.primaryEmailAddress?.emailAddress || "";
+  return {
+    id: clerk.user.id,
+    email: primaryEmail,
+    username: clerk.user.username || "",
+    firstName: clerk.user.firstName || "",
+    lastName: clerk.user.lastName || "",
+    fullName: clerk.user.fullName || "",
+    imageUrl: clerk.user.imageUrl || "",
+  };
+};
+window.__getSavedResumes = async () => {
+  const headers = await window.__getAuthHeaders();
+  if (!headers.Authorization) return [];
+  try {
+    const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/profile/resumes`, { headers });
+    const data = await resp.json();
+    return data.success ? (data.resumes || []) : [];
+  } catch { return []; }
+};
+window.__loadSavedResumePdf = async (resumeId) => {
+  const headers = await window.__getAuthHeaders();
+  if (!headers.Authorization) throw new Error('Please sign in to access saved resumes');
+
+  const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/profile/resumes/${resumeId}/pdf?dl=0`, { headers });
+  if (!resp.ok) throw new Error('Could not load saved resume');
+  return await resp.blob();
+};
+window.__readPdfText = async (source, options = {}) => {
+  const pdfLib = window.pdfjsLib || window.__pdfjsLib;
+  if (!pdfLib) throw new Error('PDF.js not loaded');
+
+  const includeLinks = Boolean(options.includeLinks);
+  const arrayBuffer = source instanceof ArrayBuffer
+    ? source
+    : source instanceof Blob
+      ? await source.arrayBuffer()
+      : source?.buffer instanceof ArrayBuffer
+        ? source.buffer
+        : await source.arrayBuffer();
+
+  const pdf = await pdfLib.getDocument({ data: arrayBuffer }).promise;
+  let text = '';
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map((item) => item.str).join(' ') + '\n';
+
+    if (includeLinks) {
+      const annots = await page.getAnnotations();
+      const urls = annots
+        .filter((annot) => annot.subtype === 'Link')
+        .map((annot) => annot.url || annot.action?.url)
+        .filter(Boolean);
+      if (urls.length) text += `Links: ${urls.join(', ')}\n`;
+    }
+  }
+
+  return text.trim();
+};
+
+const featurePathPrefixes = ['/resume-builder', '/resume-analyzer', '/cover-letter', '/interviewer', '/job-listings', '/profile'];
 
 function isFeaturePath(pathname) {
   return featurePathPrefixes.some((prefix) => pathname.startsWith(prefix));
@@ -22,7 +118,7 @@ function isFeaturePath(pathname) {
 
 function detectPageKey() {
   const first = window.location.pathname.split('/').filter(Boolean)[0] || 'index.html';
-  if (first === 'resume-builder' || first === 'resume-analyzer' || first === 'cover-letter' || first === 'interviewer') {
+  if (first === 'resume-builder' || first === 'resume-analyzer' || first === 'cover-letter' || first === 'interviewer' || first === 'profile') {
     return first;
   }
   return 'home';
@@ -47,6 +143,7 @@ function shellMarkup(activeKey) {
         <div class="cf-shell-actions" id="cf-shell-actions">
           <button class="cf-shell-btn" id="cf-login-btn">Login</button>
           <button class="cf-shell-btn" id="cf-register-btn">Register</button>
+          <a class="cf-shell-profile-link" id="cf-profile-link" href="/profile/" style="display:none;">Profile</a>
           <div id="cf-user-button" style="display:none;"></div>
         </div>
       </div>
@@ -178,6 +275,7 @@ function updateAuthUI() {
     loginBtn.style.display = 'none';
     registerBtn.style.display = 'none';
     userButton.style.display = 'block';
+    document.getElementById('cf-profile-link').style.display = 'inline-flex';
     userButton.innerHTML = '';
     clerk.mountUserButton(userButton, {
       userProfileMode: 'modal',
@@ -201,6 +299,7 @@ function updateAuthUI() {
       // no-op
     }
     userButton.style.display = 'none';
+    document.getElementById('cf-profile-link').style.display = 'none';
     loginBtn.style.display = 'inline-flex';
     registerBtn.style.display = 'inline-flex';
   }
@@ -221,6 +320,9 @@ async function initClerk() {
 
   clerk.addListener(() => updateAuthUI());
   updateAuthUI();
+  if (typeof window.__resolveClerkReady === 'function') {
+    window.__resolveClerkReady();
+  }
 }
 
 async function bootstrap() {

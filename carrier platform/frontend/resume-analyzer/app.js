@@ -1,11 +1,16 @@
-import * as pdfjsLib from "./libs/pdf.mjs";
+import * as pdfjsLib from "/resume-analyzer/libs/pdf.mjs";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = "./libs/pdf.worker.mjs";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/resume-analyzer/libs/pdf.worker.mjs";
+window.__pdfjsLib = pdfjsLib;
 
 var jobdesc = document.getElementById("jobd");
 var jobttl = document.getElementById("jobttl");
 var pdf = document.getElementById("pdf");
 var btn = document.getElementById("tlr");
+var savedResumeSelect = document.getElementById("savedResumeSelect");
+var savedResumeStatus = document.getElementById("savedResumeStatus");
+var savedResumeHint = document.getElementById("savedResumeHint");
+var pdfSourceStatus = document.getElementById("pdfSourceStatus");
 
 let loaderTimer = null;
 let lastResumeText = "";
@@ -13,6 +18,8 @@ let lastJobTitle = "";
 let lastJobDesc = "";
 let lastPdfData = null;
 let lastTailoredText = "";
+let activeResumeSource = "";
+let activeResumeBlob = null;
 
 function escHtml(s) {
   if (!s) return "";
@@ -92,56 +99,135 @@ function startLoaderCycle(onDone) {
   next();
 }
 
-btn.onclick = async function () {
-  var file = pdf.files[0];
-  if (!file) {
-    alert("please upload a file");
+async function waitForResumeHelpers() {
+  for (let i = 0; i < 200; i++) {
+    if (window.__getSavedResumes && window.__loadSavedResumePdf && window.__readPdfText) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error("Resume helpers not ready");
+}
+
+async function extractPdfText(source) {
+  await waitForResumeHelpers();
+  const rawText = await window.__readPdfText(source, { includeLinks: true });
+  return rawText
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[•●▪■]/g, "")
+    .replace(/(EXPERIENCE|SKILLS|EDUCATION|PROJECTS|SUMMARY)/gi, "\n$1\n");
+}
+
+function resetUploadState() {
+  pdf.value = "";
+  const pdfPreview = document.getElementById("pdfPreview");
+  const dropText = document.getElementById("dropText");
+  if (pdfPreview) pdfPreview.style.display = "none";
+  if (dropText) dropText.textContent = "Click to upload PDF resume";
+  if (pdfSourceStatus) pdfSourceStatus.textContent = "Upload a PDF or choose one of your saved resumes.";
+  activeResumeSource = "";
+}
+
+function showUploadState(label) {
+  const pdfName = document.getElementById("pdfName");
+  const pdfChars = document.getElementById("pdfChars");
+  const pdfPreview = document.getElementById("pdfPreview");
+  const dropText = document.getElementById("dropText");
+  if (pdfName) pdfName.textContent = label;
+  if (pdfChars) pdfChars.textContent = `(${lastResumeText.length.toLocaleString()} chars)`;
+  if (pdfPreview) pdfPreview.style.display = "flex";
+  if (dropText) dropText.textContent = "Resume uploaded ✓";
+  if (savedResumeSelect) savedResumeSelect.value = "";
+  if (savedResumeStatus) savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
+  if (savedResumeHint) savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+  if (pdfSourceStatus) pdfSourceStatus.textContent = `Using ${label}.`;
+  activeResumeSource = "upload";
+}
+
+async function loadSavedResumes() {
+  await waitForResumeHelpers();
+  const resumes = await window.__getSavedResumes();
+  savedResumeSelect.innerHTML = "";
+
+  if (!resumes.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No saved resumes yet";
+    savedResumeSelect.appendChild(option);
+    savedResumeSelect.disabled = true;
+    savedResumeStatus.textContent = "No saved resumes yet.";
+    savedResumeHint.textContent = "Go to your Profile to save a resume, then return here.";
     return;
-  } else {
-    document.querySelector(".aipnl").style.display = "block";
+  }
 
-    startLoaderCycle(() => {
-      document.querySelector(".aipnl").style.display = "none";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select a saved resume";
+  savedResumeSelect.appendChild(placeholder);
 
-      // 🔥 NOW start FileReader + API
-      var reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-      reader.onload = async function () {
-        var pdfdata = reader.result;
-        const loadingtask = pdfjsLib.getDocument(pdfdata);
+  resumes.forEach((resume) => {
+    const option = document.createElement("option");
+    option.value = resume._id;
+    option.textContent = resume.title || "Untitled Resume";
+    savedResumeSelect.appendChild(option);
+  });
 
-        const pdf = await loadingtask.promise;
+  savedResumeSelect.disabled = false;
+  savedResumeStatus.textContent = "Pick one of your saved resumes.";
+  savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+}
 
-        let fullText = "";
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
+async function useSavedResume(resumeId) {
+  if (!resumeId) {
+    lastResumeText = "";
+    activeResumeSource = "";
+    activeResumeBlob = null;
+    resetUploadState();
+    savedResumeStatus.textContent = savedResumeHint.textContent || "Select a saved resume from your Profile.";
+    return;
+  }
 
-          const textcontent = await page.getTextContent();
-          const extractedtxt = textcontent.items
+  await waitForResumeHelpers();
+  savedResumeStatus.textContent = "Loading saved resume...";
+  const resumes = await window.__getSavedResumes();
+  const selected = resumes.find((resume) => resume._id === resumeId);
+  const blob = await window.__loadSavedResumePdf(resumeId);
 
-            .map((item) => item.str)
-            .join(" ");
+  try {
+    lastResumeText = await extractPdfText(blob);
+    lastJobTitle = jobttl.value;
+    lastJobDesc = jobdesc.value;
+    activeResumeBlob = blob;
+    resetUploadState();
+    const savedFile = new File([blob], `${selected?.title || "saved-resume"}.pdf`, { type: "application/pdf" });
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(savedFile);
+    pdf.files = dataTransfer.files;
+    savedResumeSelect.value = resumeId;
+    savedResumeStatus.textContent = `Using ${selected?.title || "the selected saved resume"}.`;
+    savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+    document.getElementById("pdfSourceStatus").textContent = `Using saved resume: ${selected?.title || "Untitled Resume"}.`;
+    activeResumeSource = "saved";
+  } catch (err) {
+    throw err;
+  }
+}
 
-          fullText = fullText + extractedtxt + "\n";
+btn.onclick = async function () {
+  if (!lastResumeText) {
+    alert("please upload a file or choose a saved resume");
+    return;
+  }
 
-          const annots = await page.getAnnotations();
-          const urls = annots.filter(a => a.subtype === "Link").map(a => a.url || a.action?.url).filter(Boolean);
-          if (urls.length) fullText += "Links: " + urls.join(", ") + "\n";
-        }
-        let cleanText = fullText
-          .replace(/\s+/g, " ")
-          .trim()
-          .replace(/[•●▪■]/g, "")
-          .replace(
-            /(EXPERIENCE|SKILLS|EDUCATION|PROJECTS|SUMMARY)/gi,
-            "\n$1\n",
-          );
+  document.querySelector(".aipnl").style.display = "block";
 
-        lastResumeText = cleanText;
-        lastJobTitle = jobttl.value;
-        lastJobDesc = jobdesc.value;
+  startLoaderCycle(async () => {
+    document.querySelector(".aipnl").style.display = "none";
 
-        const jobprompt = `
+    const cleanText = lastResumeText;
+    lastJobTitle = jobttl.value;
+    lastJobDesc = jobdesc.value;
+
+    const jobprompt = `
                                         You are "ResumeTailor_Architect_v4_Industrial", a specialized, ruthless, logic-driven ATS (Applicant Tracking System) Engine.
 
                     YOUR ROLE:
@@ -479,51 +565,24 @@ btn.onclick = async function () {
 
               preferredContainer.appendChild(card);
             });
-          } else {
-            // Hide section if no data found
-            preferredSection.style.display = "none";
           }
-          /* ===============================
-                    4. FILTER IMPLIED SKILLS (CRITICAL FIX)
-                    ================================ */
-          const impliedSkills = new Set(
-            (analysis.hardSkillsAnalysis.implied || []).map((s) =>
-              s.toLowerCase(),
-            ),
-          );
 
-          const keywordSkills = new Set(
-            (analysis.hardSkillsAnalysis.keywordOptimization || []).map((k) =>
-              k.keyword.toLowerCase(),
-            ),
-          );
-
-          const realMissingSkills = (
-            analysis.hardSkillsAnalysis.missing || []
-          ).filter(
-            (m) =>
-              !impliedSkills.has(m.skill.toLowerCase()) &&
-              !keywordSkills.has(m.skill.toLowerCase()),
-          );
-
-          /* ===============================
-                    5. RENDER MISSING SKILLS & TOOLS
-                    ================================ */
+          const missingSkills = analysis.hardSkillsAnalysis?.missing || [];
           const skillsGrid = document.querySelector(".skills-grid");
           skillsGrid.innerHTML = "";
 
-          realMissingSkills.forEach((skill) => {
+          missingSkills.forEach((skill) => {
             const card = document.createElement("div");
             card.className = "skill-card";
 
             card.innerHTML = `
                         <h5>${skill.skill}</h5>
                         <div class="skill-meta">
-                        <span class="skill-importance ${skill.importance.toLowerCase()}">
-                            ● ${skill.importance} Priority
+                        <span class="skill-importance ${String(skill.importance || "low").toLowerCase()}">
+                            ● ${skill.importance || "Low"} Priority
                         </span>
                         <span class="skill-time">
-                            ⏱ ${skill.estimatedLearningTime}
+                            ⏱ ${skill.estimatedLearningTime || "1 week"}
                         </span>
                         </div>
                     `;
@@ -531,13 +590,10 @@ btn.onclick = async function () {
             skillsGrid.appendChild(card);
           });
 
-          /* ===============================
-                    6. SOFT SKILL GAPS
-                    ================================ */
           const softSkillsList = document.querySelector(".soft-skills-list");
           softSkillsList.innerHTML = "";
 
-          analysis.softSkillGaps.forEach((skill) => {
+          (analysis.softSkillGaps || []).forEach((skill) => {
             const item = document.createElement("div");
             item.className = "soft-skill-item";
 
@@ -549,20 +605,14 @@ btn.onclick = async function () {
             softSkillsList.appendChild(item);
           });
 
-          /* ===============================
-                    7. ACTIONABLE SUGGESTIONS
-                    (KEYWORD OPTIMIZATION FIRST)
-                    ================================ */
           const suggestionsList = document.querySelector(".suggestions-list");
           suggestionsList.innerHTML = "";
 
-          // ATS keyword wording fixes (NOT learning gaps)
-          (analysis.hardSkillsAnalysis.keywordOptimization || []).forEach(
-            (k) => {
-              const item = document.createElement("div");
-              item.className = "suggestion-item";
+          (analysis.hardSkillsAnalysis?.keywordOptimization || []).forEach((k) => {
+            const item = document.createElement("div");
+            item.className = "suggestion-item";
 
-              item.innerHTML = `
+            item.innerHTML = `
                         <div class="suggestion-checkbox"></div>
                         <span>
                         ATS wording fix: add "<strong>${k.keyword}</strong>" in 
@@ -570,12 +620,10 @@ btn.onclick = async function () {
                         </span>
                     `;
 
-              suggestionsList.appendChild(item);
-            },
-          );
+            suggestionsList.appendChild(item);
+          });
 
-          // General recommendations
-          analysis.recommendations.forEach((text) => {
+          (analysis.recommendations || []).forEach((text) => {
             const item = document.createElement("div");
             item.className = "suggestion-item";
 
@@ -587,20 +635,16 @@ btn.onclick = async function () {
             suggestionsList.appendChild(item);
           });
 
-          /* ===============================
-                    8. LOAD PDF INTO OVERLAY IFRAME
-                    ================================ */
           const pdfIframe = document.querySelector(
             ".overlay-resume-preview iframe",
           );
-          const pdfURL = URL.createObjectURL(file);
+          const previewBlob = activeResumeBlob || pdf.files?.[0] || null;
+          const pdfURL = previewBlob ? URL.createObjectURL(previewBlob) : "about:blank";
           pdfIframe.src = pdfURL;
-          /* ===============================
-                    CLOSE BUTTON
-                    ================================ */
+
           document.querySelector(".overlay-close").onclick = () => {
             overlay.classList.remove("active");
-            URL.revokeObjectURL(pdfURL);
+            if (previewBlob) URL.revokeObjectURL(pdfURL);
           };
 
           document.getElementById("generateJobResumeBtn").onclick = async () => {
@@ -643,7 +687,6 @@ btn.onclick = async function () {
               }
               trResult.style.display = "block";
 
-              // scroll to result
               trResult.scrollIntoView({ behavior: "smooth", block: "start" });
             } catch (err) {
               alert("Error generating resume: " + err.message);
@@ -676,19 +719,54 @@ btn.onclick = async function () {
               alert("Allow popups to print.");
             }
           };
-        } catch (err) {
-          console.error(err);
-        }
+    } catch (err) {
+      console.error(err);
+    }
 
-        stopLoaderCycle();
-        document.querySelector(".aipnl").style.display = "none";
+    stopLoaderCycle();
+    document.querySelector(".aipnl").style.display = "none";
 
-        btn.style.display = "block";
-        btn.disabled = false;
-      };
-    });
-  }
+    btn.style.display = "block";
+    btn.disabled = false;
+  });
 };
+
+if (pdf) {
+  pdf.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+      activeResumeBlob = file;
+    pdfSourceStatus.textContent = `Using uploaded resume: ${file.name}`;
+    savedResumeSelect.value = "";
+    savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
+    savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+  });
+}
+
+if (savedResumeSelect) {
+  savedResumeSelect.addEventListener("change", async (e) => {
+    try {
+      await useSavedResume(e.target.value);
+      const file = pdf.files[0];
+      if (file) {
+        pdfSourceStatus.textContent = `Using saved resume: ${savedResumeSelect.options[savedResumeSelect.selectedIndex]?.textContent || "Untitled Resume"}.`;
+      }
+    } catch (err) {
+      savedResumeStatus.textContent = "Could not load selected resume.";
+      alert("Error loading saved resume: " + err.message);
+    }
+  });
+}
+
+window.addEventListener("load", async function () {
+  try {
+    await loadSavedResumes();
+  } catch (err) {
+    if (savedResumeStatus) savedResumeStatus.textContent = "Unable to load saved resumes.";
+    if (savedResumeHint) savedResumeHint.textContent = err?.message || "Unknown error";
+  }
+});
+
 // ---------- DEMO JOB DATA ----------
 const jobDemoData = {
   1: {
@@ -743,14 +821,19 @@ Core Skills: Strong proficiency in Java (8 or above) with hands-on experience in
   },
 };
 
-// ---------- WAIT FOR DOM ----------
-document.addEventListener("DOMContentLoaded", () => {
+function bindDemoButtons() {
   const btn1 = document.getElementById("demoBtn1");
   const btn2 = document.getElementById("demoBtn2");
+  if (!btn1 || !btn2) return false;
 
-  btn1.addEventListener("click", () => injectDemoData(1));
-  btn2.addEventListener("click", () => injectDemoData(2));
-});
+  btn1.onclick = () => injectDemoData(1);
+  btn2.onclick = () => injectDemoData(2);
+  return true;
+}
+
+if (!bindDemoButtons()) {
+  document.addEventListener("DOMContentLoaded", bindDemoButtons);
+}
 
 // ---------- INJECT FUNCTION ----------
 function injectDemoData(option) {
@@ -759,6 +842,8 @@ function injectDemoData(option) {
 
   jobTitleInput.value = jobDemoData[option].title;
   jobDescInput.value = jobDemoData[option].description;
+  jobTitleInput.dispatchEvent(new Event("input", { bubbles: true }));
+  jobDescInput.dispatchEvent(new Event("input", { bubbles: true }));
 
   // Optional UX polish
   jobTitleInput.focus();

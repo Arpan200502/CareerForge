@@ -1666,3 +1666,136 @@ button#tlr:active {
   transform: none;
   box-shadow: none;
 }
+.cf-resume-source-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.cf-resume-source-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(148, 163, 184, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 10px;
+}
+
+.cf-resume-source-card:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.cf-resume-source-title {
+  font-size: 9px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.cf-resume-source-select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(148, 163, 184, 0.06);
+  color: #e2eaf8;
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+
+.cf-resume-source-select:focus {
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.cf-resume-source-select option {
+  background: #0d1424;
+  color: #e2eaf8;
+}
+
+.cf-resume-source-status {
+  font-size: 10px;
+  color: #a78bfa;
+  line-height: 1.3;
+}
+
+.cf-resume-source-note {
+  font-size: 9px;
+  color: #3f3f46;
+  line-height: 1.3;
+}
+
+.cf-resume-source-card .pdfup {
+  padding: 8px;
+  margin: 0;
+}
+
+.cf-resume-source-card .pdfup label {
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 480px) {
+  .cf-resume-source-grid { grid-template-columns: 1fr; }
+}
+/* ── Resume source grid override ── */
+.cf-resume-source-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cf-resume-source-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(148,163,184,0.1);
+  border-radius: 8px;
+}
+.cf-resume-source-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #52525b;
+  margin-bottom: 2px;
+}
+.cf-resume-source-card .pdfup {
+  padding: 6px;
+  border-radius: 6px;
+}
+.cf-resume-source-card .pdfup label {
+  font-size: 10px;
+  margin-bottom: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #71717a;
+}
+.cf-resume-source-select {
+  width: 100%;
+  padding: 5px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(148,163,184,0.12);
+  background: rgba(148,163,184,0.05);
+  color: #e2eaf8;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.cf-resume-source-select option { background: #0d1424; }
+.cf-resume-source-status {
+  font-size: 10px;
+  color: #7c3aed;
+  line-height: 1.3;
+}
+.cf-resume-source-note {
+  font-size: 9px;
+  color: #3f3f46;
+  line-height: 1.3;
+}

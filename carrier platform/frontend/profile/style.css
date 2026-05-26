@@ -1,0 +1,281 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: #080c18;
+  color: #e2eaf8;
+  min-height: 100vh;
+}
+
+.pf-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.pf-card {
+  background: linear-gradient(160deg, rgba(13,20,37,0.96), rgba(9,14,26,0.97));
+  border: 1px solid rgba(148, 163, 184, 0.10);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.pf-header {
+  text-align: center;
+  padding: 36px 24px 24px;
+  background: linear-gradient(180deg, rgba(87,214,255,0.06), transparent);
+}
+
+.pf-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  border: 2px solid rgba(87, 214, 255, 0.3);
+  overflow: hidden;
+}
+
+.pf-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pf-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #7c3aed, #6d28d9);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.pf-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.pf-header p {
+  font-size: 13px;
+  color: #7a8aaa;
+}
+
+.pf-role-badge {
+  margin-top: 10px;
+  padding: 3px 12px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pf-body {
+  padding: 24px;
+}
+
+.pf-section {
+  margin-bottom: 24px;
+}
+
+.pf-section:last-child {
+  margin-bottom: 0;
+}
+
+.pf-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.pf-count {
+  font-weight: 400;
+  color: #505d78;
+  font-size: 12px;
+}
+
+.pf-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.pf-detail-row:last-child {
+  border-bottom: none;
+}
+
+.pf-label {
+  font-size: 13px;
+  color: #7a8aaa;
+}
+
+.pf-value {
+  font-size: 13px;
+  color: #e2eaf8;
+  font-weight: 600;
+}
+
+.pf-empty {
+  font-size: 13px;
+  color: #505d78;
+  padding: 8px 0;
+}
+
+.pf-upload-area {
+  background: rgba(148, 163, 184, 0.03);
+  border: 1px dashed rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.pf-upload-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(148,163,184,0.06);
+  color: #e2eaf8;
+  font-size: 12px;
+  outline: none;
+  margin-bottom: 8px;
+}
+.pf-upload-input:focus {
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.pf-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-file-name {
+  font-size: 11px;
+  color: #505d78;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-upload-btn {
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pf-upload-btn:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #c4b5fd;
+}
+
+.pf-upload-submit {
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(160deg, #7c3aed, #6d28d9);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.pf-upload-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pf-upload-submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.pf-upload-status {
+  font-size: 11px;
+  margin-top: 6px;
+  color: #7a8aaa;
+}
+
+.pf-resume-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  margin-bottom: 6px;
+}
+
+.pf-resume-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pf-resume-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c4b5fd;
+}
+
+.pf-resume-date {
+  font-size: 11px;
+  color: #505d78;
+}
+
+.pf-resume-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.pf-resume-dl {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.pf-resume-dl:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.pf-resume-del {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: transparent;
+  color: #f87171;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pf-resume-del:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 600px) {
+  .pf-container {
+    padding: 20px 12px;
+  }
+}

@@ -344,9 +344,183 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
 .jl-card-date { color: #505d78; }
 .jl-card-view { color: #a78bfa; font-weight: 600; }
 
+/* ── Pagination ── */
+.jl-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+.jl-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.jl-page-btn:hover:not(:disabled):not(.jl-page-active) {
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.08);
+}
+.jl-page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.jl-page-active {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.15);
+  color: #a78bfa;
+}
+.jl-page-info {
+  font-size: 12px;
+  color: #505d78;
+  margin: 0 8px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .jl-container { grid-template-columns: 1fr; }
   .jl-sidebar { position: static; max-height: none; }
   .jl-main { padding-left: 0; margin-top: 16px; }
+}
+.jl-resume-source-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.jl-resume-source-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 11px;
+  background: rgba(148, 163, 184, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.09);
+  border-radius: 10px;
+  transition: border-color 0.15s;
+}
+
+.jl-resume-source-card:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.jl-resume-source-title {
+  font-size: 9px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.jl-resume-source-select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.05);
+  color: #e2eaf8;
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+
+.jl-resume-source-select:focus {
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.jl-resume-source-select option {
+  background: #0d1424;
+  color: #e2eaf8;
+}
+
+.jl-resume-source-status {
+  font-size: 10px;
+  color: #a78bfa;
+  line-height: 1.3;
+}
+
+.jl-resume-source-note {
+  font-size: 9px;
+  color: #374151;
+  line-height: 1.3;
+}
+
+@media (max-width: 480px) {
+  .jl-resume-source-grid { grid-template-columns: 1fr; }
+}/* ── Resume source grid override ── */
+.jl-resume-source-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.jl-resume-source-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(148,163,184,0.09);
+  border-radius: 8px;
+}
+.jl-resume-source-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #52525b;
+}
+.jl-resume-source-card .jl-upload-area {
+  padding: 8px;
+  border-radius: 6px;
+  border-width: 1px;
+}
+.jl-resume-source-card .jl-upload-icon { display: none; }
+.jl-resume-source-card .jl-upload-area p {
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.jl-resume-source-card .jl-resume-loaded p { font-size: 11px; }
+.jl-resume-source-card .jl-resume-check {
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+}
+.jl-resume-source-select {
+  width: 100%;
+  padding: 5px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(148,163,184,0.12);
+  background: rgba(148,163,184,0.05);
+  color: #e2eaf8;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.jl-resume-source-select option { background: #0d1424; }
+.jl-resume-source-status {
+  font-size: 10px;
+  color: #7c3aed;
+  line-height: 1.3;
+}
+.jl-resume-source-note {
+  font-size: 9px;
+  color: #374151;
+  line-height: 1.3;
 }

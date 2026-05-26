@@ -2,19 +2,30 @@ const SERVER_URL = "http://localhost:5000";
 
 let allFilterOptions = { countries: [], sources: [], experienceLevels: [] };
 let resumeText = localStorage.getItem("jl_resumeText") || "";
+let activeResumeSource = resumeText ? "session" : "";
 
 // ── DOM refs ──
-const uploadArea = document.getElementById("uploadArea");
+const uploadArea = document.getElementById("uploadArea") || null;
 const resumeUpload = document.getElementById("resumeUpload");
 const resumeLoaded = document.getElementById("resumeLoaded");
+const resumeLoadedLabel = document.getElementById("resumeLoadedLabel");
+const resumeLoadedMeta = document.getElementById("resumeLoadedMeta");
 const changeResumeBtn = document.getElementById("changeResumeBtn");
+const savedResumeSelect = document.getElementById("jlSavedResumeSelect") || document.getElementById("savedResumeSelect");
+const savedResumeStatus = document.getElementById("jlSavedResumeStatus") || document.getElementById("savedResumeStatus");
+const savedResumeHint = document.getElementById("jlSavedResumeHint") || document.getElementById("savedResumeHint");
 const jobGrid = document.getElementById("jobGrid");
+const pagination = document.getElementById("pagination");
 const loadingState = document.getElementById("loadingState");
 const emptyState = document.getElementById("emptyState");
 const jobCount = document.getElementById("jobCount");
 const sourceInfo = document.getElementById("sourceInfo");
 const refreshBtn = document.getElementById("refreshBtn");
 const fetchNewBtn = document.getElementById("fetchNewBtn");
+
+let currentPage = 1;
+let currentTotalPages = 1;
+let currentTotalJobs = 0;
 
 // Filter elements
 const filterTitle = document.getElementById("filterTitle");
@@ -50,6 +61,66 @@ function getFilters() {
   };
 }
 
+function setPaginationState(totalJobs, totalPages, page) {
+  currentTotalJobs = totalJobs || 0;
+  currentTotalPages = Math.max(parseInt(totalPages) || 1, 1);
+  currentPage = Math.min(Math.max(parseInt(page) || 1, 1), currentTotalPages);
+}
+
+function renderPagination() {
+  if (!pagination) return;
+
+  if (currentTotalPages <= 1) {
+    pagination.style.display = "none";
+    pagination.innerHTML = "";
+    return;
+  }
+
+  pagination.style.display = "flex";
+  pagination.innerHTML = "";
+
+  const addButton = (label, targetPage, options = {}) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "jl-page-btn" + (options.active ? " jl-page-active" : "");
+    btn.textContent = label;
+    btn.disabled = !!options.disabled || targetPage === currentPage;
+    if (!btn.disabled) {
+      btn.addEventListener("click", () => fetchAndRender(targetPage));
+    }
+    pagination.appendChild(btn);
+  };
+
+  const addInfo = (text) => {
+    const span = document.createElement("span");
+    span.className = "jl-page-info";
+    span.textContent = text;
+    pagination.appendChild(span);
+  };
+
+  addButton("Prev", currentPage - 1, { disabled: currentPage <= 1 });
+
+  const visibleWindow = 2;
+  const startPage = Math.max(1, currentPage - visibleWindow);
+  const endPage = Math.min(currentTotalPages, currentPage + visibleWindow);
+
+  if (startPage > 1) {
+    addButton("1", 1, { active: currentPage === 1 });
+    if (startPage > 2) addInfo("...");
+  }
+
+  for (let page = startPage; page <= endPage; page++) {
+    addButton(String(page), page, { active: page === currentPage });
+  }
+
+  if (endPage < currentTotalPages) {
+    if (endPage < currentTotalPages - 1) addInfo("...");
+    addButton(String(currentTotalPages), currentTotalPages, { active: currentPage === currentTotalPages });
+  }
+
+  addButton("Next", currentPage + 1, { disabled: currentPage >= currentTotalPages });
+}
+
 // ── Fetch filter options from backend ──
 async function loadFilterOptions() {
   try {
@@ -71,21 +142,94 @@ async function loadFilterOptions() {
 }
 
 // ── PDF Parsing (for resume upload) ──
-async function parsePdf(file) {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdfjsLib = window.pdfjsLib;
-  if (!pdfjsLib) throw new Error("PDF.js not loaded");
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let text = "";
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    text += content.items.map((item) => item.str).join(" ") + "\n";
-    const annots = await page.getAnnotations();
-    const urls = annots.filter(a => a.subtype === "Link").map(a => a.url || a.action?.url).filter(Boolean);
-    if (urls.length) text += "Links: " + urls.join(", ") + "\n";
+async function waitForResumeHelpers() {
+  for (let i = 0; i < 80; i++) {
+    if (window.__getSavedResumes && window.__loadSavedResumePdf && window.__readPdfText) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
-  return text.replace(/\s+/g, " ").trim();
+  throw new Error("Resume helpers not ready");
+}
+
+async function parsePdf(source) {
+  await waitForResumeHelpers();
+  const rawText = await window.__readPdfText(source, { includeLinks: true });
+  return rawText.replace(/\s+/g, " ").trim();
+}
+
+function clearUploadState() {
+  resumeUpload.value = "";
+  if (uploadArea) uploadArea.style.display = "block";
+  if (resumeLoaded) resumeLoaded.style.display = "none";
+  if (resumeLoadedLabel) resumeLoadedLabel.textContent = "Resume stored";
+  if (resumeLoadedMeta) resumeLoadedMeta.textContent = "";
+}
+
+function showUploadState(label) {
+  if (uploadArea) uploadArea.style.display = "none";
+  if (resumeLoaded) resumeLoaded.style.display = "block";
+  if (resumeLoadedLabel) resumeLoadedLabel.textContent = "Resume stored";
+  if (resumeLoadedMeta) resumeLoadedMeta.textContent = label;
+  if (savedResumeSelect) savedResumeSelect.value = "";
+  if (savedResumeStatus) savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
+  if (savedResumeHint) savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+  activeResumeSource = "upload";
+}
+
+async function loadSavedResumes() {
+  await waitForResumeHelpers();
+  const resumes = await window.__getSavedResumes();
+  savedResumeSelect.innerHTML = "";
+
+  if (!resumes.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No saved resumes yet";
+    savedResumeSelect.appendChild(option);
+    savedResumeSelect.disabled = true;
+    savedResumeStatus.textContent = "No saved resumes yet.";
+    savedResumeHint.textContent = "Go to your Profile to save a resume, then return here.";
+    return;
+  }
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select a saved resume";
+  savedResumeSelect.appendChild(placeholder);
+
+  resumes.forEach((resume) => {
+    const option = document.createElement("option");
+    option.value = resume._id;
+    option.textContent = resume.title || "Untitled Resume";
+    savedResumeSelect.appendChild(option);
+  });
+
+  savedResumeSelect.disabled = false;
+  savedResumeStatus.textContent = "Pick one of your saved resumes.";
+  savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+}
+
+async function useSavedResume(resumeId) {
+  if (!resumeId) {
+    resumeText = "";
+    activeResumeSource = "";
+    clearUploadState();
+    savedResumeStatus.textContent = savedResumeHint.textContent || "Select a saved resume from your Profile.";
+    localStorage.removeItem("jl_resumeText");
+    return;
+  }
+
+  await waitForResumeHelpers();
+  savedResumeStatus.textContent = "Loading saved resume...";
+  const resumes = await window.__getSavedResumes();
+  const selected = resumes.find((resume) => resume._id === resumeId);
+  const blob = await window.__loadSavedResumePdf(resumeId);
+  resumeText = await parsePdf(blob);
+  localStorage.setItem("jl_resumeText", resumeText);
+  clearUploadState();
+  savedResumeSelect.value = resumeId;
+  savedResumeStatus.textContent = `Using ${selected?.title || "the selected saved resume"}.`;
+  savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
+  activeResumeSource = "saved";
 }
 
 resumeUpload.addEventListener("change", async (e) => {
@@ -94,25 +238,32 @@ resumeUpload.addEventListener("change", async (e) => {
   try {
     resumeText = await parsePdf(file);
     localStorage.setItem("jl_resumeText", resumeText);
-    uploadArea.style.display = "none";
-    resumeLoaded.style.display = "block";
+    showUploadState(file.name);
   } catch (err) {
     alert("Error reading resume: " + err.message);
   }
 });
 
 changeResumeBtn.addEventListener("click", () => {
-  resumeUpload.value = "";
+  clearUploadState();
   resumeUpload.click();
 });
 
+savedResumeSelect.addEventListener("change", async (e) => {
+  try {
+    await useSavedResume(e.target.value);
+  } catch (err) {
+    savedResumeStatus.textContent = "Could not load selected resume.";
+    alert("Error loading saved resume: " + err.message);
+  }
+});
+
 if (resumeText) {
-  uploadArea.style.display = "none";
-  resumeLoaded.style.display = "block";
+  showUploadState(activeResumeSource === "session" ? "Loaded from session memory" : "Resume ready");
 }
 
 // ── Apply / Clear / Refresh / Fetch New ──
-applyFiltersBtn.addEventListener("click", () => fetchAndRender());
+applyFiltersBtn.addEventListener("click", () => fetchAndRender(1));
 
 clearFiltersBtn.addEventListener("click", () => {
   filterTitle.value = "";
@@ -125,11 +276,11 @@ clearFiltersBtn.addEventListener("click", () => {
   filterLimit.value = "200";
   filterPlatforms.querySelectorAll("input[type=checkbox]").forEach((cb) => (cb.checked = true));
   filterKeywords.querySelectorAll("input[type=checkbox]").forEach((cb) => (cb.checked = false));
-  fetchAndRender();
+  fetchAndRender(1);
 });
 
 refreshBtn.addEventListener("click", () => {
-  fetchAndRender();
+  fetchAndRender(currentPage);
 });
 
 // DEMO: manually trigger a new job fetch from all platforms
@@ -157,7 +308,7 @@ fetchNewBtn.addEventListener("click", async () => {
 });
 
 // ── Main: fetch jobs with filters from backend ──
-async function fetchAndRender() {
+async function fetchAndRender(page = currentPage) {
   loadingState.style.display = "block";
   emptyState.style.display = "none";
   jobGrid.innerHTML = "";
@@ -165,6 +316,7 @@ async function fetchAndRender() {
 
   try {
     const filters = getFilters();
+    filters.page = page;
     console.log("[Jobs] Filters:", JSON.stringify(filters));
 
     const matchRes = await fetch(`${SERVER_URL}/api/match-jobs`, {
@@ -174,15 +326,17 @@ async function fetchAndRender() {
     });
     const data = await matchRes.json();
     const jobs = data.jobs || [];
+    setPaginationState(data.total || jobs.length, data.totalPages || 1, data.page || page);
 
     if (!jobs.length) {
       loadingState.style.display = "none";
       emptyState.style.display = "block";
-      if (data.totalJobs === 0) {
+      if ((data.total || 0) === 0) {
         emptyState.innerHTML = "<p>No jobs in database yet. Click <strong>Fetch New Jobs</strong> above to trigger a fresh scrape.</p>";
       } else {
         emptyState.innerHTML = "<p>No jobs match your filters. Try broader criteria.</p>";
       }
+      renderPagination();
       return;
     }
 
@@ -192,6 +346,10 @@ async function fetchAndRender() {
     loadingState.style.display = "none";
     emptyState.style.display = "block";
     emptyState.innerHTML = "<p>Error loading jobs. Please try again.</p>";
+    if (pagination) {
+      pagination.style.display = "none";
+      pagination.innerHTML = "";
+    }
   }
 
   loadingState.style.display = "none";
@@ -201,7 +359,7 @@ async function fetchAndRender() {
 function renderJobs(jobs) {
   jobGrid.innerHTML = "";
   emptyState.style.display = "none";
-  jobCount.textContent = `${jobs.length} job${jobs.length !== 1 ? "s" : ""} found`;
+  jobCount.textContent = `${currentTotalJobs} job${currentTotalJobs !== 1 ? "s" : ""} found • Page ${currentPage} of ${currentTotalPages}`;
 
   const platforms = [...new Set(jobs.map((j) => j.source).filter(Boolean))];
   sourceInfo.textContent = `Sources: ${platforms.join(", ")}`;
@@ -251,6 +409,8 @@ function renderJobs(jobs) {
 
     jobGrid.appendChild(card);
   });
+
+  renderPagination();
 }
 
 function escHtml(s) {
@@ -263,5 +423,19 @@ function escHtml(s) {
 // ── Init: always fetch fresh from backend ──
 (async function init() {
   await loadFilterOptions();
-  await fetchAndRender();
+  await fetchAndRender(1);
+})();
+
+(async function initSavedResumePicker() {
+  try {
+    await loadSavedResumes();
+    if (resumeText) {
+      if (resumeLoadedLabel) resumeLoadedLabel.textContent = activeResumeSource === "session" ? "Resume stored" : "Resume stored";
+      if (resumeLoadedMeta) resumeLoadedMeta.textContent = activeResumeSource === "session" ? "Loaded from session memory" : (resumeLoadedMeta.textContent || "");
+      if (savedResumeStatus) savedResumeStatus.textContent = activeResumeSource === "saved" ? savedResumeStatus.textContent : (savedResumeStatus.textContent || "Pick one of your saved resumes.");
+    }
+  } catch (err) {
+    if (savedResumeStatus) savedResumeStatus.textContent = "Unable to load saved resumes.";
+    if (savedResumeHint) savedResumeHint.textContent = err.message;
+  }
 })();

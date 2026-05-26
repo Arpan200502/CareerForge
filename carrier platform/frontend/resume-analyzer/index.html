@@ -3,15 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/resume-analyzer/" />
     <title>Resume-X</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="icon" href="./public/favicon.png" />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="icon" href="/resume-analyzer/public/favicon.png" />
+    <link rel="stylesheet" href="/resume-analyzer/style.css" />
     <link rel="stylesheet" href="/shared-shell.css" />
+    <script>
+      window.__clerkReady = new Promise(function (resolve) {
+        window.__resolveClerkReady = resolve;
+      });
+    </script>
   </head>
   <style>
     /* AI Review Overlay Styles */
@@ -655,9 +659,26 @@
 
             <h2 class="section-title">Resume</h2>
 
-            <div class="form-group pdfup animate-entry delay-6">
-              <label>Upload Resume (PDF)</label>
-              <input id="pdf" type="file" accept="application/pdf" />
+            <div class="form-group animate-entry delay-6">
+              <label>Resume Source</label>
+              <div class="rs-box">
+                <div class="rs-row">
+                  <div class="rs-item">
+                    <span class="rs-label">Upload</span>
+                    <input id="pdf" type="file" accept="application/pdf" />
+                  </div>
+                  <div class="rs-divider"></div>
+                  <div class="rs-item">
+                    <span class="rs-label">Saved</span>
+                    <select id="savedResumeSelect" class="rs-select">
+                      <option value="">Loading...</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="pdfSourceStatus" class="rs-status">Upload a PDF or choose one of your saved resumes.</div>
+                <div id="savedResumeStatus" style="display:none"></div>
+                <div id="savedResumeHint" style="display:none"></div>
+              </div>
             </div>
           </div>
 

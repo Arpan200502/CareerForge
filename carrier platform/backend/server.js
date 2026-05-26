@@ -49,10 +49,77 @@ const jobSchema = new mongoose.Schema({
   uniqueId:        { type: String, unique: true },
 });
 jobSchema.index({ fetchedAt: -1 });
+jobSchema.index({ datePosted: -1 });
 jobSchema.index({ source: 1 });
 jobSchema.index({ country: 1 });
 jobSchema.index({ experienceLevel: 1 });
 const Job = mongoose.model("Job", jobSchema);
+
+// ── Profile Schema ────────────────────────────────────────────
+const resumeSubSchema = new mongoose.Schema({
+  title:                  { type: String, default: "" },
+  content:                { type: String, default: "" },
+  cloudinaryUrl:          { type: String, default: "" },
+  cloudinaryPublicId:     { type: String, default: "" },
+  createdAt:              { type: Date, default: Date.now },
+  updatedAt:              { type: Date, default: Date.now },
+}, { _id: true });
+
+const profileSchema = new mongoose.Schema({
+  clerkId:    { type: String, unique: true, required: true },
+  email:      { type: String, default: "" },
+  username:   { type: String, default: "" },
+  firstName:  { type: String, default: "" },
+  lastName:   { type: String, default: "" },
+  role:       { type: String, enum: ["user", "admin"], default: "user" },
+  resumes:    [resumeSubSchema],
+}, { timestamps: true });
+profileSchema.index({ email: 1 });
+const Profile = mongoose.model("Profile", profileSchema);
+
+// ── Clerk Auth Middleware ─────────────────────────────────────
+const { verifyToken } = require('@clerk/backend');
+
+async function clerkAuth(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    let token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : req.query.token;
+    if (!token) {
+      return res.status(401).json({ success: false, error: "Missing or invalid Authorization header" });
+    }
+    const jwtPayload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
+    req.auth = {
+      userId: jwtPayload.sub,
+      sessionId: jwtPayload.sid,
+      claims: jwtPayload,
+    };
+    console.log(`[Clerk Auth] Verified: userId=${jwtPayload.sub}`);
+    next();
+  } catch (err) {
+    console.error("[Clerk Auth] Verification failed:", err.message);
+    return res.status(401).json({ success: false, error: "Invalid or expired session token: " + err.message });
+  }
+}
+
+async function clerkAuthOptional(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const jwtPayload = await verifyToken(token, {
+        secretKey: process.env.CLERK_SECRET_KEY,
+      });
+      req.auth = {
+        userId: jwtPayload.sub,
+        sessionId: jwtPayload.sid,
+        claims: jwtPayload,
+      };
+    }
+  } catch (_) {}
+  next();
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -63,11 +130,239 @@ const altacvCls = fs.readFileSync("../frontend/resume-builder/altacv.cls", "utf8
 // Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 app.use(express.json({ limit: "200mb" }));
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 150 * 1024 * 1024 } });
+
+// ── Cloudinary Config ──────────────────────────────────────────
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+function enrichResume(r) {
+  const doc = r.toObject ? r.toObject() : { ...r };
+  if (doc._id) {
+    doc.viewUrl = `/api/profile/resumes/${doc._id}/pdf?dl=0`;
+    doc.downloadUrl = `/api/profile/resumes/${doc._id}/pdf?dl=1`;
+  }
+  return doc;
+}
+
+function enrichProfile(p) {
+  const doc = p.toObject ? p.toObject() : { ...p };
+  doc.resumes = (doc.resumes || []).map(enrichResume);
+  return doc;
+}
+
+// ── Profile API Routes ────────────────────────────────────────
+
+// GET /api/profile — fetch the authenticated user's profile
+app.get("/api/profile", clerkAuth, async (req, res) => {
+  try {
+    let profile = await Profile.findOne({ clerkId: req.auth.userId });
+    if (!profile) {
+      return res.json({ success: false, error: "Profile not found. Create one first." });
+    }
+    res.json({ success: true, profile: enrichProfile(profile) });
+  } catch (err) {
+    console.error("[Profile] Get error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/profile — create or upsert profile (auto-create on first sign-in)
+app.post("/api/profile", clerkAuth, async (req, res) => {
+  try {
+    const { email, username, firstName, lastName } = req.body || {};
+    const adminEmail = (process.env.ADMIN_EMAIL || "").toLowerCase();
+    const role = email && email.toLowerCase() === adminEmail ? "admin" : "user";
+
+    const profile = await Profile.findOneAndUpdate(
+      { clerkId: req.auth.userId },
+      {
+        $setOnInsert: {
+          clerkId: req.auth.userId,
+          email: email || "",
+          username: username || "",
+          firstName: firstName || "",
+          lastName: lastName || "",
+          role,
+        },
+      },
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+    );
+
+    res.json({ success: true, profile: enrichProfile(profile) });
+  } catch (err) {
+    console.error("[Profile] Create error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT /api/profile — update profile fields (email, username, etc.)
+app.put("/api/profile", clerkAuth, async (req, res) => {
+  try {
+    const updates = {};
+    const allowed = ["email", "username", "firstName", "lastName"];
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+    if (updates.email) {
+      const adminEmail = (process.env.ADMIN_EMAIL || "").toLowerCase();
+      updates.role = updates.email.toLowerCase() === adminEmail ? "admin" : "user";
+    }
+    const profile = await Profile.findOneAndUpdate(
+      { clerkId: req.auth.userId },
+      { $set: updates },
+      { returnDocument: 'after' }
+    );
+    if (!profile) {
+      return res.status(404).json({ success: false, error: "Profile not found" });
+    }
+    res.json({ success: true, profile: enrichProfile(profile) });
+  } catch (err) {
+    console.error("[Profile] Update error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/profile/resumes — get saved resumes
+app.get("/api/profile/resumes", clerkAuth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ clerkId: req.auth.userId });
+    if (!profile) return res.json({ success: true, resumes: [] });
+    res.json({ success: true, resumes: (profile.resumes || []).map(enrichResume) });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/profile/resumes — save a new resume
+app.post("/api/profile/resumes", clerkAuth, async (req, res) => {
+  try {
+    const { title, content } = req.body || {};
+    if (!title || !content) {
+      return res.status(400).json({ success: false, error: "title and content are required" });
+    }
+    const profile = await Profile.findOneAndUpdate(
+      { clerkId: req.auth.userId },
+      { $push: { resumes: { title, content } } },
+      { returnDocument: 'after' }
+    );
+    if (!profile) return res.status(404).json({ success: false, error: "Profile not found" });
+    const saved = profile.resumes[profile.resumes.length - 1];
+    res.json({ success: true, resume: enrichResume(saved) });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/profile/resumes/:id — delete a saved resume
+app.delete("/api/profile/resumes/:id", clerkAuth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne(
+      { clerkId: req.auth.userId }
+    );
+    if (!profile) return res.status(404).json({ success: false, error: "Profile not found" });
+
+    const resume = profile.resumes.id(req.params.id);
+    if (resume && resume.cloudinaryPublicId) {
+      await cloudinary.uploader.destroy(resume.cloudinaryPublicId, { resource_type: 'image' }).catch(() => {});
+    }
+
+    await Profile.findOneAndUpdate(
+      { clerkId: req.auth.userId },
+      { $pull: { resumes: { _id: req.params.id } } },
+      { returnDocument: 'after' }
+    );
+    res.json({ success: true, message: "Resume deleted" });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/profile/resumes/upload — upload a PDF resume to Cloudinary
+app.post("/api/profile/resumes/upload", clerkAuth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No file provided" });
+    }
+    const title = req.body.title || req.file.originalname.replace(/\.pdf$/i, '') || "Untitled Resume";
+
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'resumes',
+          public_id: `${req.auth.userId}_${Date.now()}`,
+          resource_type: 'raw',
+        },
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+
+    const profile = await Profile.findOneAndUpdate(
+      { clerkId: req.auth.userId },
+      {
+        $push: {
+          resumes: {
+            title,
+            cloudinaryUrl: result.secure_url,
+            cloudinaryPublicId: result.public_id,
+          }
+        }
+      },
+      { returnDocument: 'after' }
+    );
+
+    if (!profile) return res.status(404).json({ success: false, error: "Profile not found" });
+    const saved = profile.resumes[profile.resumes.length - 1];
+    res.json({ success: true, resume: enrichResume(saved) });
+  } catch (err) {
+    console.error("[Profile] Upload error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/profile/resumes/:id/pdf — proxy PDF from Cloudinary with correct Content-Type
+app.get("/api/profile/resumes/:id/pdf", clerkAuth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ clerkId: req.auth.userId });
+    if (!profile) return res.status(404).json({ success: false, error: "Profile not found" });
+
+    const resume = profile.resumes.id(req.params.id);
+    if (!resume || !resume.cloudinaryUrl) {
+      return res.status(404).json({ success: false, error: "Resume not found" });
+    }
+
+    const isDownload = req.query.dl === '1';
+    const cloudResp = await axios({
+      method: 'GET',
+      url: resume.cloudinaryUrl,
+      responseType: 'stream',
+    });
+
+    res.set('Content-Type', 'application/pdf');
+    if (isDownload) {
+      const filename = encodeURIComponent(resume.title || 'resume.pdf');
+      res.set('Content-Disposition', `attachment; filename="${filename}"`);
+    } else {
+      res.set('Content-Disposition', 'inline');
+    }
+    cloudResp.data.pipe(res);
+  } catch (err) {
+    console.error("[Profile] PDF proxy error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // Configuration from .env
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -795,14 +1090,15 @@ async function runJobFetch() {
 }
 
 /**
- * Delete jobs older than 7 days from MongoDB.
+ * Delete jobs older than 7 days from MongoDB (based on datePosted).
  */
 async function cleanupOldJobs() {
-  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
   try {
-    const result = await Job.deleteMany({ fetchedAt: { $lt: cutoff } });
+    const result = await Job.deleteMany({ datePosted: { $lt: cutoffStr } });
     if (result.deletedCount > 0) {
-      console.log(`[Cleanup] Deleted ${result.deletedCount} jobs older than 7 days`);
+      console.log(`[Cleanup] Deleted ${result.deletedCount} jobs with datePosted older than ${cutoffStr}`);
     }
   } catch (err) {
     console.error("[Cleanup] Error:", err.message);
@@ -819,6 +1115,18 @@ cron.schedule("0 2 * * *", () => {
 cron.schedule("0 * * * *", () => {
   cleanupOldJobs();
 });
+
+// ── Startup: purge stale jobs (before scraper max_days_old was added) ──
+(async () => {
+  try {
+    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const stale = await Job.deleteMany({ datePosted: { $lt: cutoffStr } });
+    if (stale.deletedCount > 0) {
+      console.log(`[Startup] Purged ${stale.deletedCount} stale jobs (datePosted < ${cutoffStr})`);
+    }
+  } catch (_) {}
+})();
 
 // ── API Endpoints ────────────────────────────────────────────
 
@@ -1241,7 +1549,10 @@ app.post("/api/generate-audios", async (req, res) => {
   try {
     const { questions, prefixGreeting } = req.body;
     if (!questions || !Array.isArray(questions)) return res.status(400).json({ error: "Invalid questions array" });
-    const texts = questions.map((q, i) => `${prefixGreeting || ""} ${q}`.trim());
+    const texts = questions.map((q, i) => {
+      if (i === 0 && prefixGreeting) return `${prefixGreeting} ${q}`.trim();
+      return String(q || "").trim();
+    });
     const audios = await Promise.all(
       texts.map((text) => textToSpeech(text).catch((err) => {
         console.error("Error generating audio:", err);
@@ -1309,8 +1620,11 @@ app.post("/api/fetch-jobs", async (req, res) => {
     const { filters } = req.body;
     const query = {};
     const limit = Math.min(parseInt(filters?.limit) || 50, 200);
-    const jobs = await Job.find(query).sort({ fetchedAt: -1, _id: -1 }).limit(limit);
-    res.json({ success: true, jobs, source: "mongodb-cache" });
+    const page = Math.max(parseInt(filters?.page) || 1, 1);
+    const skip = (page - 1) * limit;
+    const total = await Job.countDocuments(query);
+    const jobs = await Job.find(query).sort({ fetchedAt: -1, _id: -1 }).skip(skip).limit(limit);
+    res.json({ success: true, jobs, source: "mongodb-cache", total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
     console.error("Fetch Jobs Error:", error.message);
     const cached = await Job.find().sort({ fetchedAt: -1, _id: -1 }).limit(50).catch(() => []);
@@ -1370,18 +1684,17 @@ app.post("/api/match-jobs", async (req, res) => {
       }
       if (filters.hoursOld) {
         const cutoff = new Date(Date.now() - parseInt(filters.hoursOld) * 60 * 60 * 1000);
-        query.fetchedAt = { $gte: cutoff };
+        query.datePosted = { $gte: cutoff.toISOString().slice(0, 10) };
       }
     }
 
     const limit = Math.min(parseInt(filters?.limit) || 50, 200);
-    const jobs = await Job.find(query).sort({ fetchedAt: -1, _id: -1 }).limit(limit).lean();
-    if (!jobs.length) {
-      const totalJobs = await Job.countDocuments({});
-      return res.json({ success: true, jobs: [], totalJobs });
-    }
+    const page = Math.max(parseInt(filters?.page) || 1, 1);
+    const skip = (page - 1) * limit;
+    const total = await Job.countDocuments(query);
+    const jobs = await Job.find(query).sort({ fetchedAt: -1, _id: -1 }).skip(skip).limit(limit).lean();
 
-    res.json({ success: true, jobs });
+    res.json({ success: true, jobs, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
     console.error("[Jobs] Error:", error.message);
     res.status(500).json({ success: false, error: error.message });
