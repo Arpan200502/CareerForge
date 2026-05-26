@@ -200,31 +200,45 @@ function openAuthModal(view) {
 
   closeAuthModal();
 
+  const clerkAppearance = {
+    variables: {
+      colorPrimary: '#57d6ff',
+      colorBackground: '#0b1222',
+      colorInputBackground: '#101a31',
+      colorText: '#f1f5f9',
+      colorTextSecondary: '#94a3b8',
+      colorInputText: '#f1f5f9',
+    },
+    elements: {
+      card: 'border: 1px solid rgba(87, 214, 255, 0.25)',
+      headerTitle: 'color: #f1f5f9',
+      headerSubtitle: 'color: #94a3b8',
+      dividerText: 'color: #64748b',
+      footerActionText: 'color: #94a3b8',
+      footerActionLink: 'color: #57d6ff',
+      formFieldLabel: 'color: #cbd5e1',
+      formFieldInput: 'color: #f1f5f9',
+      socialButtonsBlockButton: 'color: #f1f5f9; border-color: rgba(148,163,184,0.25)',
+      socialButtonsBlockButtonText: 'color: #f1f5f9',
+      formButtonPrimary: 'background: linear-gradient(135deg, #57d6ff 0%, #7c3aed 100%); color: #071126; border: none',
+      alertText: 'color: #f1f5f9',
+      identityPreviewText: 'color: #f1f5f9',
+    },
+  };
+
   if (view === 'signUp') {
     clerk.openSignUp({
       signInUrl: '/index.html',
       afterSignInUrl: window.location.href,
       afterSignUpUrl: window.location.href,
-      appearance: {
-        variables: {
-          colorPrimary: '#57d6ff',
-          colorBackground: '#0b1222',
-          colorInputBackground: '#101a31',
-        },
-      },
+      appearance: clerkAppearance,
     });
   } else {
     clerk.openSignIn({
       signUpUrl: '/index.html',
       afterSignInUrl: window.location.href,
       afterSignUpUrl: window.location.href,
-      appearance: {
-        variables: {
-          colorPrimary: '#57d6ff',
-          colorBackground: '#0b1222',
-          colorInputBackground: '#101a31',
-        },
-      },
+      appearance: clerkAppearance,
     });
   }
 }
@@ -283,6 +297,19 @@ function updateAuthUI() {
       appearance: {
         variables: {
           colorPrimary: '#57d6ff',
+          colorBackground: '#0b1222',
+          colorText: '#f1f5f9',
+          colorTextSecondary: '#94a3b8',
+          colorInputBackground: '#101a31',
+          colorInputText: '#f1f5f9',
+        },
+        elements: {
+          card: 'border: 1px solid rgba(87, 214, 255, 0.25)',
+          headerTitle: 'color: #f1f5f9',
+          headerSubtitle: 'color: #94a3b8',
+          formFieldLabel: 'color: #cbd5e1',
+          formFieldInput: 'color: #f1f5f9',
+          formButtonPrimary: 'background: linear-gradient(135deg, #57d6ff 0%, #7c3aed 100%); color: #071126; border: none',
         },
       },
     });
@@ -326,7 +353,56 @@ async function initClerk() {
   }
 }
 
+function injectClerkThemeCSS() {
+  const style = document.createElement('style');
+  style.textContent = `
+    :root {
+      --clerk-color-text: #f1f5f9;
+      --clerk-color-text-secondary: #94a3b8;
+      --clerk-color-background: #0b1222;
+      --clerk-color-primary: #57d6ff;
+      --clerk-color-input-background: #101a31;
+      --clerk-color-input-text: #f1f5f9;
+    }
+    #clerk-modal,
+    [class*="cl-"],
+    [class*="cl-card"],
+    [class*="cl-formFieldLabel"],
+    [class*="cl-headerTitle"],
+    [class*="cl-headerSubtitle"],
+    [class*="cl-footerActionText"],
+    [class*="cl-dividerText"],
+    [class*="cl-socialButtons"],
+    [class*="cl-alertText"],
+    [class*="cl-identityPreview"],
+    [class*="cl-formHeader"] {
+      color: #f1f5f9 !important;
+    }
+    [class*="cl-formFieldInput"],
+    [class*="cl-input"] {
+      color: #f1f5f9 !important;
+      background-color: #101a31 !important;
+    }
+    [class*="cl-card"] {
+      background: #0b1222 !important;
+      border: 1px solid rgba(87, 214, 255, 0.25) !important;
+    }
+    [class*="cl-formButtonPrimary"],
+    [class*="cl-primary"] {
+      background: linear-gradient(135deg, #57d6ff 0%, #7c3aed 100%) !important;
+      color: #071126 !important;
+      border: none !important;
+    }
+    [class*="cl-footerActionLink"],
+    [class*="cl-link"] {
+      color: #57d6ff !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 async function bootstrap() {
+  injectClerkThemeCSS();
   mountShell();
   attachShellEvents();
 
