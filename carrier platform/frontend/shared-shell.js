@@ -13,6 +13,32 @@ const links = [
   { href: '/leaderboard/', label: 'Leaderboard', key: 'leaderboard' },
 ];
 
+const PLAN_FEATURES = {
+  free: [
+    '₹0 / month',
+    '5 Resume Analyses (per 15 days)',
+    '5 Job-Fit Resumes (per 15 days)',
+    '1 Interview Prep (per 15 days)',
+    '3 Cover Letters (per 15 days)',
+    'View up to 10 Jobs at a time',
+  ],
+  pro: [
+    '50 Resume Analyses / month',
+    '30 Job-Fit Resumes / month',
+    '20 Interview Preps / month',
+    '30 Cover Letters / month',
+    'View 100 Jobs at a time',
+  ],
+  max: [
+    '₹299 / month',
+    '100 Resume Analyses / month',
+    '100 Job-Fit Resumes / month',
+    '35 Interview Preps / month',
+    '60 Cover Letters / month',
+    'View ALL Jobs (no limit)',
+  ],
+};
+
 let clerk = null;
 let pendingFeaturePath = null;
 
@@ -190,15 +216,20 @@ function shellMarkup(activeKey) {
             <div class="cf-plan-tier-copy" id="cf-plan-current-copy">No usage data loaded yet.</div>
             <div class="cf-plan-current-usage" id="cf-plan-current-usage"></div>
             <ul class="cf-plan-usage-list" id="cf-plan-usage-list"></ul>
+            <ul class="cf-plan-features" id="cf-plan-free-features"></ul>
             <div class="cf-plan-actions">
               <button class="cf-shell-btn" id="cf-plan-free-btn" type="button">Select Free Plan</button>
               <a class="cf-shell-link" href="/profile/">Open Dashboard</a>
             </div>
           </section>
           <section class="cf-plan-tier" id="cf-plan-tier-pro">
-            <div class="cf-plan-tier-name">Pro</div>
+            <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+              <div class="cf-plan-tier-name">Pro</div>
+              <div class="cf-plan-tier-badge">Most Popular</div>
+            </div>
             <div class="cf-plan-tier-price" id="cf-plan-pro-price">Loading...</div>
             <div class="cf-plan-tier-copy" id="cf-plan-pro-copy">Plan details loading.</div>
+            <ul class="cf-plan-features" id="cf-plan-pro-features"></ul>
             <div class="cf-plan-actions">
               <button class="cf-shell-btn" id="cf-plan-pro-btn" type="button">Upgrade to Pro</button>
             </div>
@@ -207,6 +238,7 @@ function shellMarkup(activeKey) {
             <div class="cf-plan-tier-name">Max</div>
             <div class="cf-plan-tier-price" id="cf-plan-max-price">Loading...</div>
             <div class="cf-plan-tier-copy" id="cf-plan-max-copy">Plan details loading.</div>
+            <ul class="cf-plan-features" id="cf-plan-max-features"></ul>
             <div class="cf-plan-actions">
               <button class="cf-shell-btn" id="cf-plan-max-btn" type="button">Upgrade to Max</button>
             </div>
@@ -515,6 +547,25 @@ async function populatePlanModal(context = {}) {
   } catch (err) {
     console.error('[Plans] payment catalog load failed:', err.message);
     if (statusEl) statusEl.textContent = err.message;
+  }
+
+  // Populate static feature lists for visual clarity
+  try {
+    const freeFeaturesEl = document.getElementById('cf-plan-free-features');
+    const proFeaturesEl = document.getElementById('cf-plan-pro-features');
+    const maxFeaturesEl = document.getElementById('cf-plan-max-features');
+
+    if (freeFeaturesEl) {
+      freeFeaturesEl.innerHTML = (PLAN_FEATURES.free || []).map(f => `<li>${f}</li>`).join('');
+    }
+    if (proFeaturesEl) {
+      proFeaturesEl.innerHTML = (PLAN_FEATURES.pro || []).map(f => `<li>${f}</li>`).join('');
+    }
+    if (maxFeaturesEl) {
+      maxFeaturesEl.innerHTML = (PLAN_FEATURES.max || []).map(f => `<li>${f}</li>`).join('');
+    }
+  } catch (e) {
+    // non-fatal
   }
 }
 

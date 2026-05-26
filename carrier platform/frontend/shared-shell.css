@@ -192,6 +192,25 @@ body.cf-shell-enabled {
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
 }
 
+/* Keep modal card within viewport and allow internal scrolling */
+.cf-plan-modal-card {
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+/* Reduce modal typography so more content fits without scrolling */
+.cf-plan-modal-card {
+  font-size: 14px;
+}
+
+.cf-plan-modal-header h3 {
+  font-size: 18px;
+}
+
+.cf-plan-modal-copy {
+  font-size: 13px;
+}
+
 .cf-plan-modal-header {
   display: flex;
   align-items: flex-start;
@@ -236,6 +255,16 @@ body.cf-shell-enabled {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+/* Stack plan cards on narrow viewports to prevent overflow */
+@media (max-width: 900px) {
+  .cf-plan-modal-card { padding: 14px; }
+  .cf-plan-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .cf-plan-tier { width: 100%; }
 }
 
 .cf-plan-tier {
@@ -302,6 +331,36 @@ body.cf-shell-enabled {
   border: 1px solid rgba(148, 163, 184, 0.08);
 }
 
+.cf-plan-features {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cf-plan-features li {
+  font-size: 12px;
+  color: #e6ebff;
+  background: rgba(14, 22, 36, 0.28);
+  border: 1px solid rgba(148,163,184,0.04);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.cf-plan-tier-price {
+  font-size: 16px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+/* Hide usage counters under the Current Plan card (usage is shown in profile) */
+.cf-plan-tier-current .cf-plan-current-usage,
+.cf-plan-tier-current .cf-plan-usage-list {
+  display: none;
+}
+
 .cf-plan-actions {
   display: flex;
   flex-wrap: wrap;
@@ -314,6 +373,21 @@ body.cf-shell-enabled {
   margin: 12px 0 0;
   font-size: 13px;
   color: #cbd5e1;
+}
+
+.cf-plan-tier-badge {
+  background: linear-gradient(90deg,#ffd28a,#ff9a57);
+  color: #071126;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(255,154,87,0.12);
+}
+
+#cf-plan-tier-pro {
+  border-color: rgba(124,58,237,0.36);
+  background: linear-gradient(180deg, rgba(124,58,237,0.04), rgba(87,214,255,0.02));
 }
 
 .cf-plan-actions .cf-shell-btn:disabled {

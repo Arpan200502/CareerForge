@@ -72,7 +72,7 @@ function formatPaymentPlan(planKey) {
     amount: plan.amount,
     currency: plan.currency,
     description: plan.description,
-    displayPrice: `INR ${(plan.amount / 100).toFixed(2)}`,
+    displayPrice: `₹${Math.round(plan.amount / 100)} / month`,
   };
 }
 
