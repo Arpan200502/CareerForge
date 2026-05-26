@@ -54,11 +54,11 @@ let isRecording      = false;
 
 // Hardcoded greeting
 function getFixedGreeting(totalQ) {
-  return `Hello from ResumeX. My name is Simran. I am your interviewer today. We will go through ${totalQ} questions. Take your time with each answer. Let's begin.`;
+  return `Hello from Career Forge. My name is Simran. I am your interviewer today. We will go through ${totalQ} questions. Take your time with each answer. Let's begin.`;
 }
 
 function getShadowIntroText() {
-  return "Hello from ResumeX. My name is Simran. I am your interviewer today. Shadow mode is on, so after each answer I will share a short ideal answer based on your resume and this job description. You can skip any shadow answer with the skip button. Let's begin.";
+  return "Hello from Career Forge. My name is Simran. I am your interviewer today. Shadow mode is on, so after each answer I will share a short ideal answer based on your resume and this job description. You can skip any shadow answer with the skip button. Let's begin.";
 }
 
 // ── Backend Server Calls ────────────────────────────────────
