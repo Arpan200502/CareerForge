@@ -13,6 +13,66 @@ CareerForge has been built using the MERN Stack architecture along with several 
 The main objective behind the project is to transform a college-level academic project into a fully functional industry-grade product that solves real-world problems faced by students, freshers, and professionals during job preparation.
 
 ---
+## 🧭 Getting Started — Clone and Run Locally
+
+Follow these steps to clone the repository, install dependencies and run the backend and frontend locally.
+
+1. Clone the repo:
+
+```powershell
+git clone https://github.com/Arpan200502/CareerForge.git
+cd "CareerForge/carrier platform"
+```
+
+2. Backend (API + payments)
+
+```powershell
+cd backend
+npm install
+# create a .env file with your secrets or export env vars:
+# RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, CLERK_SECRET_KEY, MONGODB_URI
+node server.js
+# or if package.json defines a start script:
+# npm start
+```
+
+3. Frontend (static pages + Clerk integration)
+
+```powershell
+cd ../frontend
+npm install
+# serve the static frontend (project uses `serve` in start script):
+npm start
+# or run directly:
+# npx serve . --listen 3000
+```
+
+4. Ports and access
+
+- Backend: http://localhost:5000
+- Frontend: http://localhost:3000
+
+Open the frontend URL in your browser, sign in, and use the app. The frontend talks to the backend at `http://localhost:5000` by default (see `frontend/shared-shell.js`).
+
+## 🗂️ Project File System (top-level overview)
+
+- carrier platform/
+  - backend/  — Express API, Mongoose models, payment routes, `server.js` (run backend here)
+  - frontend/ — Static frontend pages, `shared-shell.js` for shared UI and plan modal, and feature folders:
+    - resume-analyzer/
+    - resume-builder/
+    - cover-letter/
+    - interviewer/
+    - job-listings/
+    - profile/
+
+Files of interest:
+- `backend/config/paymentPlans.js` — plan metadata and prices
+- `backend/config/planLimits.js` — usage limits per plan
+- `backend/routes/payment.js` — Razorpay order + verification endpoints
+- `frontend/shared-shell.js` — navbar, plan modal, payment client wiring
+- `frontend/shared-shell.css` — modal and plan styles
+
 
 ## 🛠️ Technology Stack
 
@@ -400,65 +460,6 @@ Whenever a resume is analyzed:
 
 ---
 
-## 🧭 Getting Started — Clone and Run Locally
-
-Follow these steps to clone the repository, install dependencies and run the backend and frontend locally.
-
-1. Clone the repo:
-
-```powershell
-git clone https://github.com/Arpan200502/CareerForge.git
-cd "CareerForge/carrier platform"
-```
-
-2. Backend (API + payments)
-
-```powershell
-cd backend
-npm install
-# create a .env file with your secrets or export env vars:
-# RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, CLERK_SECRET_KEY, MONGODB_URI
-node server.js
-# or if package.json defines a start script:
-# npm start
-```
-
-3. Frontend (static pages + Clerk integration)
-
-```powershell
-cd ../frontend
-npm install
-# serve the static frontend (project uses `serve` in start script):
-npm start
-# or run directly:
-# npx serve . --listen 3000
-```
-
-4. Ports and access
-
-- Backend: http://localhost:5000
-- Frontend: http://localhost:3000
-
-Open the frontend URL in your browser, sign in, and use the app. The frontend talks to the backend at `http://localhost:5000` by default (see `frontend/shared-shell.js`).
-
-## 🗂️ Project File System (top-level overview)
-
-- carrier platform/
-  - backend/  — Express API, Mongoose models, payment routes, `server.js` (run backend here)
-  - frontend/ — Static frontend pages, `shared-shell.js` for shared UI and plan modal, and feature folders:
-    - resume-analyzer/
-    - resume-builder/
-    - cover-letter/
-    - interviewer/
-    - job-listings/
-    - profile/
-
-Files of interest:
-- `backend/config/paymentPlans.js` — plan metadata and prices
-- `backend/config/planLimits.js` — usage limits per plan
-- `backend/routes/payment.js` — Razorpay order + verification endpoints
-- `frontend/shared-shell.js` — navbar, plan modal, payment client wiring
-- `frontend/shared-shell.css` — modal and plan styles
 
 ## 🛠 Troubleshooting
 
