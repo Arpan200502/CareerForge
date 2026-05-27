@@ -1,6 +1,6 @@
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080c18; color: #e2eaf8; min-height: 100vh; }
+body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #000; color: #e2eaf8; min-height: 100vh; }
 
 /* ── Layout ── */
 .jl-container {
@@ -25,9 +25,9 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
 .jl-sidebar::-webkit-scrollbar { width: 4px; }
 .jl-sidebar::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.15); border-radius: 4px; }
 .jl-sidebar-inner {
-  background: linear-gradient(160deg, rgba(13,20,37,0.98), rgba(9,14,26,0.99));
-  border: 1px solid rgba(148, 163, 184, 0.10);
-  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(0,0,0,0.96), rgba(0,0,0,0.92));
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
   padding: 20px;
 }
 
@@ -37,7 +37,7 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
 .jl-sidebar-section:last-child { margin-bottom: 0; }
 
 .jl-upload-area {
-  border: 2px dashed rgba(148, 163, 184, 0.25);
+  border: 2px dashed rgba(255,255,255,0.15);
   border-radius: 12px;
   padding: 18px 14px;
   text-align: center;
@@ -126,8 +126,8 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(148,163,184,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
   color: #e2eaf8;
   font-size: 13px;
   outline: none;
@@ -135,9 +135,9 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
 }
 .jl-filter-select:focus,
 .jl-filter-input:focus {
-  border-color: rgba(124, 58, 237, 0.4);
+  border-color: rgba(255,255,255,0.25);
 }
-.jl-filter-select option { background: #0d1424; color: #e2eaf8; }
+.jl-filter-select option { background: #000; color: #e2eaf8; }
 
 .jl-checkbox-group {
   display: flex;
@@ -169,17 +169,17 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
 
 .jl-fetch-btn {
   width: 100%;
-  padding: 10px;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 10px;
-  background: rgba(16, 185, 129, 0.08);
+  padding: 10px 20px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  background: linear-gradient(to right, #171717, #0a0a0a);
   color: #34d399;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.2s;
 }
-.jl-fetch-btn:hover { background: rgba(16, 185, 129, 0.15); }
+.jl-fetch-btn:hover { border-color: rgba(255,255,255,0.20); background: linear-gradient(to right, #262626, #171717); }
 .jl-fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .jl-type-badge {
@@ -194,18 +194,18 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
 
 .jl-apply-filters {
   width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(160deg, #7c3aed, #6d28d9);
+  padding: 10px 20px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  background: linear-gradient(to right, #171717, #0a0a0a);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.15s;
+  transition: all 0.2s;
   margin-top: 6px;
 }
-.jl-apply-filters:hover { filter: brightness(1.1); }
+.jl-apply-filters:hover { border-color: rgba(255,255,255,0.20); background: linear-gradient(to right, #262626, #171717); }
 
 /* ── Main ── */
 .jl-main { padding-left: 24px; }
@@ -252,8 +252,8 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #080
 .jl-grid { display: flex; flex-direction: column; gap: 12px; }
 
 .jl-card {
-  background: linear-gradient(160deg, rgba(13,20,37,0.96), rgba(9,14,26,0.97));
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: linear-gradient(160deg, rgba(0,0,0,0.96), rgba(0,0,0,0.92));
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
   padding: 18px 20px;
   cursor: pointer;

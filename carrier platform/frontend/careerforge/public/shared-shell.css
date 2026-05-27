@@ -1,122 +1,261 @@
 :root {
-  --cf-shell-bg: rgba(8, 12, 24, 0.86);
-  --cf-shell-border: rgba(255, 255, 255, 0.12);
-  --cf-shell-text: #e6ebff;
-  --cf-shell-text-muted: #a5afd3;
-  --cf-shell-accent: #57d6ff;
-  --cf-surface: #0d1428;
-  --cf-surface-border: rgba(87, 214, 255, 0.2);
+  /* Match shadcn dark theme (globals.css .dark) exactly */
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
 }
 
 body.cf-shell-enabled {
-  padding-top: 66px;
+  padding-top: 56px;
 }
 
+/* ── Nav: pixel-perfect match of header-2.tsx ── */
 .cf-shell-nav {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 12000;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: linear-gradient(90deg, var(--cf-shell-bg), rgba(18, 26, 52, 0.78));
-  border-bottom: 1px solid var(--cf-shell-border);
+  height: 56px;
+  background: hsl(var(--background) / 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 .cf-shell-inner {
-  max-width: 1360px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 10px 16px;
+  height: 100%;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
 }
 
+/* ── Brand ── */
 .cf-shell-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: var(--cf-shell-text);
-  text-decoration: none;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  font-size: 15px;
-}
-
-.cf-shell-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #b8f4ff 0%, var(--cf-shell-accent) 70%);
-  box-shadow: 0 0 12px rgba(87, 214, 255, 0.8);
-}
-
-.cf-shell-links {
-  display: inline-flex;
-  align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.cf-shell-sparkles {
+  width: 20px;
+  height: 20px;
+  color: hsl(var(--primary));
+}
+
+/* ── Desktop links (ghost button variant) ── */
+.cf-shell-links {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .cf-shell-links {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
 }
 
 .cf-shell-link {
-  color: var(--cf-shell-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 8px 16px;
+  border-radius: calc(var(--radius) * 1);
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 10px;
-  border-radius: 9px;
-  border: 1px solid transparent;
-  transition: all 0.18s ease;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
 .cf-shell-link:hover,
 .cf-shell-link.active {
-  color: var(--cf-shell-text);
-  border-color: rgba(87, 214, 255, 0.35);
-  background: rgba(87, 214, 255, 0.12);
+  color: hsl(var(--accent-foreground));
+  background: hsl(var(--accent));
 }
 
+/* ── Desktop auth actions ── */
 .cf-shell-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: none;
 }
 
-.cf-shell-btn {
-  border: 1px solid rgba(87, 214, 255, 0.35);
-  color: var(--cf-shell-text);
-  background: rgba(87, 214, 255, 0.14);
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 8px 11px;
+@media (min-width: 768px) {
+  .cf-shell-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+/* Outline button (Sign In / Profile) — matches shadcn outline variant */
+.cf-shell-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 8px 16px;
+  border-radius: calc(var(--radius) * 1);
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.15s ease;
 }
 
-.cf-shell-btn:hover {
-  background: rgba(87, 214, 255, 0.22);
+.cf-shell-btn-outline:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
 }
 
-.cf-shell-profile-link {
+/* Solid/primary button (Get Started) — matches shadcn default variant */
+.cf-shell-btn-solid {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: var(--cf-shell-text);
+  justify-content: center;
+  height: 40px;
+  padding: 8px 16px;
+  border-radius: calc(var(--radius) * 1);
+  border: none;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
   text-decoration: none;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 8px 11px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.06);
-  transition: all 0.18s ease;
+  transition: all 0.15s ease;
 }
 
-.cf-shell-profile-link:hover {
-  background: rgba(87, 214, 255, 0.12);
-  border-color: rgba(87, 214, 255, 0.35);
+.cf-shell-btn-solid:hover {
+  background: hsl(var(--primary) / 0.9);
+}
+
+/* ── Mobile hamburger: matches shadcn icon button (outline variant) ── */
+.cf-shell-mobile-toggle {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) * 1);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+@media (min-width: 768px) {
+  .cf-shell-mobile-toggle {
+    display: none;
+  }
+}
+
+.cf-shell-mobile-toggle:hover {
+  background: hsl(var(--accent));
+}
+
+.cf-hamburger-line {
+  display: block;
+  width: 16px;
+  height: 2px;
+  background: hsl(var(--foreground));
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.cf-shell-mobile-toggle.open .cf-hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.cf-shell-mobile-toggle.open .cf-hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.cf-shell-mobile-toggle.open .cf-hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Mobile menu: matches header-2.tsx mobile drawer ── */
+.cf-shell-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: hsl(var(--background) / 0.95);
+  border-top: 1px solid hsl(var(--border));
+  flex-direction: column;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.cf-shell-mobile-menu.open {
+  display: flex;
+}
+
+.cf-shell-mobile-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cf-shell-mobile-links .cf-shell-link {
+  justify-content: flex-start;
+  height: auto;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.cf-shell-mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.cf-shell-mobile-actions .cf-shell-btn-solid,
+.cf-shell-mobile-actions .cf-shell-btn-outline {
+  width: 100%;
+  height: 40px;
+  justify-content: center;
 }
 
 .cf-feature-gate {
@@ -126,10 +265,9 @@ body.cf-shell-enabled {
   align-items: center;
   justify-content: center;
   z-index: 14900;
-  background: rgba(4, 8, 18, 0.72);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  padding: 18px;
+  background: hsl(var(--background) / 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .cf-feature-gate.open {
@@ -137,32 +275,34 @@ body.cf-shell-enabled {
 }
 
 .cf-feature-gate-card {
-  width: min(460px, 96vw);
-  background: #0d162b;
-  border: 1px solid rgba(87, 214, 255, 0.3);
-  border-radius: 14px;
-  padding: 18px;
+  max-width: 400px;
+  width: 90%;
+  padding: 28px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
   text-align: center;
-  color: var(--cf-shell-text);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
 }
 
 .cf-feature-gate-card h3 {
-  margin: 0 0 8px;
   font-size: 20px;
+  font-weight: 700;
+  color: hsl(var(--card-foreground));
+  margin-bottom: 10px;
 }
 
 .cf-feature-gate-card p {
-  margin: 0 0 14px;
-  color: var(--cf-shell-text-muted);
   font-size: 14px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 18px;
+  line-height: 1.5;
 }
 
 .cf-feature-gate-actions {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 .cf-plan-modal {
@@ -173,7 +313,7 @@ body.cf-shell-enabled {
   align-items: center;
   justify-content: center;
   padding: 18px;
-  background: rgba(4, 8, 18, 0.76);
+  background: hsl(var(--background) / 0.8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -184,23 +324,15 @@ body.cf-shell-enabled {
 
 .cf-plan-modal-card {
   width: min(960px, 96vw);
-  background: linear-gradient(160deg, rgba(13, 20, 37, 0.98), rgba(9, 14, 26, 0.99));
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 18px;
-  padding: 20px;
-  color: var(--cf-shell-text);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
-}
-
-/* Keep modal card within viewport and allow internal scrolling */
-.cf-plan-modal-card {
   max-height: calc(100vh - 48px);
   overflow: auto;
-}
-
-/* Reduce modal typography so more content fits without scrolling */
-.cf-plan-modal-card {
   font-size: 14px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  padding: 20px;
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
 }
 
 .cf-plan-modal-header h3 {
@@ -223,7 +355,7 @@ body.cf-shell-enabled {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #57d6ff;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 6px;
 }
 
@@ -242,13 +374,19 @@ body.cf-shell-enabled {
 .cf-plan-modal-close {
   width: 34px;
   height: 34px;
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: rgba(148, 163, 184, 0.06);
-  color: var(--cf-shell-text);
+  border-radius: calc(var(--radius) * 1);
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--muted-foreground));
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cf-plan-modal-close:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
 }
 
 .cf-plan-modal-grid {
@@ -268,15 +406,10 @@ body.cf-shell-enabled {
 }
 
 .cf-plan-tier {
-  border-radius: 14px;
+  border-radius: calc(var(--radius) * 1.75);
   padding: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  background: rgba(148, 163, 184, 0.04);
-}
-
-.cf-plan-tier-current {
-  border-color: rgba(87, 214, 255, 0.24);
-  background: rgba(87, 214, 255, 0.06);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
 }
 
 .cf-plan-tier-muted {
@@ -288,14 +421,14 @@ body.cf-shell-enabled {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #94a3b8;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 6px;
 }
 
 .cf-plan-tier-price {
   font-size: 22px;
   font-weight: 800;
-  color: #e2eaf8;
+  color: hsl(var(--card-foreground));
   margin-bottom: 6px;
 }
 
@@ -303,12 +436,11 @@ body.cf-shell-enabled {
 .cf-plan-current-usage {
   font-size: 13px;
   line-height: 1.5;
-  color: #a5afd3;
+  color: hsl(var(--muted-foreground));
 }
 
 .cf-plan-current-usage {
   margin-top: 8px;
-  color: #cbd5e1;
 }
 
 .cf-plan-usage-list {
@@ -324,11 +456,11 @@ body.cf-shell-enabled {
   justify-content: space-between;
   gap: 8px;
   font-size: 13px;
-  color: #cbd5e1;
+  color: hsl(var(--muted-foreground));
   padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(15, 23, 42, 0.54);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: calc(var(--radius) * 1);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
 }
 
 .cf-plan-features {
@@ -342,17 +474,11 @@ body.cf-shell-enabled {
 
 .cf-plan-features li {
   font-size: 12px;
-  color: #e6ebff;
-  background: rgba(14, 22, 36, 0.28);
-  border: 1px solid rgba(148,163,184,0.04);
+  color: hsl(var(--card-foreground));
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   padding: 8px 10px;
-  border-radius: 6px;
-}
-
-.cf-plan-tier-price {
-  font-size: 16px;
-  margin-top: 6px;
-  margin-bottom: 8px;
+  border-radius: calc(var(--radius) * 0.75);
 }
 
 /* Hide usage counters under the Current Plan card (usage is shown in profile) */
@@ -386,11 +512,11 @@ body.cf-shell-enabled {
 }
 
 #cf-plan-tier-pro {
-  border-color: rgba(124,58,237,0.36);
-  background: linear-gradient(180deg, rgba(124,58,237,0.04), rgba(87,214,255,0.02));
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.02);
 }
 
-.cf-plan-actions .cf-shell-btn:disabled {
+.cf-plan-actions .cf-shell-btn-outline:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
@@ -402,10 +528,10 @@ body.cf-shell-enabled {
 }
 
 .cf-resume-source-card {
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 12px;
   padding: 14px;
-  background: rgba(148, 163, 184, 0.03);
+  background: rgba(255,255,255,0.02);
 }
 
 .cf-resume-source-title {
@@ -427,9 +553,9 @@ body.cf-shell-enabled {
 .cf-resume-source-select {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: rgba(148, 163, 184, 0.06);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
   color: var(--cf-shell-text);
   font-size: 13px;
   outline: none;
@@ -441,13 +567,13 @@ body.cf-shell-enabled {
 }
 
 .cf-resume-source-select option {
-  background: #0d1424;
+  background: #000;
   color: #e2eaf8;
 }
 
 .rs-box {
   background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(148,163,184,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   padding: 8px 10px;
   display: flex;
@@ -482,7 +608,7 @@ body.cf-shell-enabled {
 .rs-divider {
   width: 1px;
   height: 20px;
-  background: rgba(148,163,184,0.12);
+  background: rgba(255,255,255,0.08);
   flex-shrink: 0;
 }
 
@@ -490,9 +616,9 @@ body.cf-shell-enabled {
   flex: 1;
   min-width: 0;
   padding: 4px 6px;
-  border-radius: 5px;
-  border: 1px solid rgba(148,163,184,0.12);
-  background: rgba(148,163,184,0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
   color: #e2eaf8;
   font-size: 11px;
   font-family: inherit;
@@ -501,7 +627,7 @@ body.cf-shell-enabled {
   width: 100%;
 }
 
-.rs-select option { background: #0d1424; }
+.rs-select option { background: #000; }
 
 .rs-status {
   font-size: 10px;
@@ -512,8 +638,8 @@ body.cf-shell-enabled {
 
 .rs-change {
   background: transparent;
-  border: 1px solid rgba(148,163,184,0.15);
-  color: #6b7280;
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.50);
   padding: 2px 7px;
   border-radius: 4px;
   font-size: 9px;
@@ -552,24 +678,17 @@ body.cf-shell-enabled .mobile-menu {
 body[data-cf-page="resume-builder"],
 body[data-cf-page="resume-analyzer"],
 body[data-cf-page="interviewer"] {
-  background: radial-gradient(1200px 700px at 10% -10%, rgba(87, 214, 255, 0.1), transparent 60%),
-    radial-gradient(900px 500px at 90% -10%, rgba(124, 58, 237, 0.12), transparent 60%),
-    #0a1020;
+  background: radial-gradient(1200px 700px at 10% -10%, rgba(255,255,255,0.02), transparent 60%),
+    radial-gradient(900px 500px at 90% -10%, rgba(255,255,255,0.01), transparent 60%),
+    #000;
 }
 
 body[data-cf-page="resume-builder"] .panel,
 body[data-cf-page="resume-analyzer"] .sidebar,
 body[data-cf-page="resume-analyzer"] .preview-panel {
-  background: linear-gradient(160deg, rgba(13, 20, 40, 0.95), rgba(17, 28, 56, 0.92)) !important;
-  border: 1px solid var(--cf-surface-border) !important;
+  background: linear-gradient(160deg, rgba(0,0,0,0.96), rgba(0,0,0,0.92)) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
   box-shadow: 0 24px 54px rgba(0, 0, 0, 0.45) !important;
-}
-
-body[data-cf-page="resume-builder"] .btn,
-body[data-cf-page="resume-analyzer"] #tlr {
-  background: linear-gradient(135deg, #57d6ff 0%, #7c3aed 100%) !important;
-  color: #071126 !important;
-  border: none !important;
 }
 
 body[data-cf-page="resume-builder"] .container {
@@ -626,4 +745,88 @@ body[data-cf-page="interviewer"] .screen {
   .cf-plan-modal-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ══════════════════════════════════════════════
+   Theme: Landing page design system (THEME.md)
+   Applied to all feature pages via shared-shell
+   ══════════════════════════════════════════════ */
+
+/* ── Base reset ── */
+body {
+  background: hsl(var(--background)) !important;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Smooth page entry ── */
+@keyframes cf-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+body.cf-shell-enabled .main-container,
+body.cf-shell-enabled .cl-container,
+body.cf-shell-enabled .lb-container,
+body.cf-shell-enabled .pf-container,
+body.cf-shell-enabled .container,
+body.cf-shell-enabled .setup-card,
+body.cf-shell-enabled .jl-container,
+body[data-cf-page="interviewer"] .screen.active {
+  animation: cf-fade-up 0.5s ease-out forwards;
+}
+
+/* ── Standardized card surface ── */
+.cf-surface {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: calc(var(--radius) * 2) !important;
+}
+
+/* ── Button: landing page style (rounded-xl, neutral gradient) ── */
+.cf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: calc(var(--radius) * 1.5);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.cf-btn-primary:hover {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--border));
+}
+
+/* ── Input fields: landing page style ── */
+input, textarea, select {
+  border-radius: calc(var(--radius) * 1) !important;
+  background: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--input)) !important;
+  color: hsl(var(--foreground)) !important;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: hsl(var(--ring)) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.3) !important;
+}
+
+/* ── Labels ── */
+label, .jl-filter-label, .cl-label {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: hsl(var(--muted-foreground)) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }

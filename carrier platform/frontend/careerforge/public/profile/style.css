@@ -1,7 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  background: #080c18;
+  background: #000;
   color: #e2eaf8;
   min-height: 100vh;
 }
@@ -13,9 +13,9 @@ body {
 }
 
 .pf-card {
-  background: linear-gradient(160deg, rgba(13,20,37,0.96), rgba(9,14,26,0.97));
-  border: 1px solid rgba(148, 163, 184, 0.10);
-  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(0,0,0,0.96), rgba(0,0,0,0.92));
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
   overflow: hidden;
 }
 
@@ -223,8 +223,8 @@ body {
 }
 
 .pf-upload-area {
-  background: rgba(148, 163, 184, 0.03);
-  border: 1px dashed rgba(148, 163, 184, 0.15);
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed rgba(255,255,255,0.15);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 14px;
@@ -234,12 +234,15 @@ body {
   width: 100%;
   padding: 8px 10px;
   border-radius: 6px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(148,163,184,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
   color: #e2eaf8;
   font-size: 12px;
   outline: none;
   margin-bottom: 8px;
+}
+.pf-upload-input:focus {
+  border-color: rgba(255,255,255,0.25);
 }
 .pf-upload-input:focus {
   border-color: rgba(124, 58, 237, 0.4);

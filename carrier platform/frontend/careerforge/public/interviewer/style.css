@@ -14,13 +14,13 @@ html, body {
 :root {
   --brand-purple: #7c3aed;
   
-  --bg: #080c18;
-  --surface: #0d1425;
-  --surface2: rgba(148, 163, 184, 0.06);
-  --surface3: rgba(148, 163, 184, 0.03);
+  --bg: #000;
+  --surface: rgba(0,0,0,0.96);
+  --surface2: rgba(255,255,255,0.04);
+  --surface3: rgba(255,255,255,0.02);
   
-  --border: rgba(148, 163, 184, 0.10);
-  --border2: rgba(148, 163, 184, 0.12);
+  --border: rgba(255,255,255,0.10);
+  --border2: rgba(255,255,255,0.08);
   
   --text: #e2eaf8;
   --text2: #7a8aaa;
@@ -69,7 +69,7 @@ body[data-cf-page="interviewer"] .screen {
 #deviceCheck { align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
 
 .setup-card {
-  background: linear-gradient(160deg, rgba(13,20,37,0.96), rgba(9,14,26,0.97));
+  background: linear-gradient(160deg, rgba(0,0,0,0.96), rgba(0,0,0,0.92));
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 32px;
@@ -100,28 +100,28 @@ body[data-cf-page="interviewer"] .screen {
 .setup-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 4px; }
 
 .field label {
-  font-size: 13px; color: #94a3b8; text-transform: uppercase;
+  font-size: 12px; color: rgba(255,255,255,0.50); text-transform: uppercase;
   letter-spacing: 0.05em; margin-bottom: 8px; display: block; font-weight: 600;
 }
 
 textarea, select, input {
-  width: 100%; background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.12);
-  border-radius: 10px; padding: 12px 14px; font-family: 'Inter', sans-serif;
+  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 8px; padding: 12px 14px; font-family: 'Inter', sans-serif;
   font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s;
 }
 textarea { resize: vertical; min-height: 120px; }
 textarea:focus, select:focus, input:focus {
-  border-color: rgba(124,58,237,0.4);
+  border-color: rgba(255,255,255,0.25);
 }
 select { cursor: pointer; }
 
 select option {
-  background: #ffffff;
-  color: #000000;
+  background: #000;
+  color: #e2eaf8;
 }
 
 .pdf-drop {
-  border: 1px dashed rgba(148,163,184,0.2); border-radius: 12px;
+  border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px;
   padding: 30px; text-align: center; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   transition: border-color 0.15s;
@@ -149,9 +149,9 @@ input[type=file] { display: none; }
 
 .shadow-field {
   padding: 16px;
-  border: 1px solid rgba(148,163,184,0.12);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
-  background: rgba(148,163,184,0.03);
+  background: rgba(255,255,255,0.02);
 }
 
 .shadow-row {
@@ -193,8 +193,8 @@ input[type=file] { display: none; }
 .slider {
   position: absolute;
   inset: 0;
-  background: rgba(148,163,184,0.1);
-  border: 1px solid rgba(148,163,184,0.12);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 999px;
   transition: 0.2s ease;
 }
@@ -222,7 +222,7 @@ input[type=file] { display: none; }
 }
 
 .device-card {
-  background: linear-gradient(160deg, rgba(13,20,37,0.96), rgba(9,14,26,0.97));
+  background: linear-gradient(160deg, rgba(0,0,0,0.96), rgba(0,0,0,0.92));
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 32px;

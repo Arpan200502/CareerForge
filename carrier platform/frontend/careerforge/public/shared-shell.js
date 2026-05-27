@@ -4,7 +4,6 @@ const CLERK_PUBLISHABLE_KEY = 'pk_test_dGlkeS1hcmFjaG5pZC04Ni5jbGVyay5hY2NvdW50c
 window.__SERVER_URL = 'http://localhost:5000';
 
 const links = [
-  { href: '/', label: 'Home', key: 'home' },
   { href: '/resume-builder/', label: 'Resume Builder', key: 'resume-builder' },
   { href: '/resume-analyzer/', label: 'Resume Analyzer', key: 'resume-analyzer' },
   { href: '/cover-letter/', label: 'Cover Letter', key: 'cover-letter' },
@@ -158,7 +157,7 @@ function isFeaturePath(pathname) {
 
 function detectPageKey() {
   const first = window.location.pathname.split('/').filter(Boolean)[0] || 'index.html';
-  if (first === 'resume-builder' || first === 'resume-analyzer' || first === 'cover-letter' || first === 'interviewer' || first === 'profile' || first === 'leaderboard') {
+  if (first === 'resume-builder' || first === 'resume-analyzer' || first === 'cover-letter' || first === 'interviewer' || first === 'profile' || first === 'leaderboard' || first === 'job-listings') {
     return first;
   }
   return 'home';
@@ -174,27 +173,42 @@ function shellMarkup(activeKey) {
 
   return `
     <header class="cf-shell-nav">
-      <div class="cf-shell-inner">
+      <nav class="cf-shell-inner">
         <a class="cf-shell-brand" href="/">
-          <span class="cf-shell-dot"></span>
-          <span>Career Forge</span>
+          <svg class="cf-shell-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.937 3.343a2 2 0 0 1 4.126 0l.365 2.555a2 2 0 0 0 1.674 1.674l2.555.365a2 2 0 0 1 0 4.126l-2.555.365a2 2 0 0 0-1.674 1.674l-.365 2.555a2 2 0 0 1-4.126 0l-.365-2.555a2 2 0 0 0-1.674-1.674l-2.555-.365a2 2 0 0 1 0-4.126l2.555-.365a2 2 0 0 0 1.674-1.674l.365-2.555z"/>
+          </svg>
+          <span>CareerForge</span>
         </a>
-        <nav class="cf-shell-links">${navLinks}</nav>
+        <div class="cf-shell-links" id="cf-shell-links">${navLinks}</div>
         <div class="cf-shell-actions" id="cf-shell-actions">
-          <button class="cf-shell-btn" id="cf-login-btn">Login</button>
-          <button class="cf-shell-btn" id="cf-register-btn">Register</button>
-          <a class="cf-shell-profile-link" id="cf-profile-link" href="/profile/" style="display:none;">Profile</a>
+          <button class="cf-shell-btn-outline" id="cf-login-btn">Sign In</button>
+          <button class="cf-shell-btn-solid" id="cf-register-btn">Get Started</button>
+          <a class="cf-shell-btn-outline" id="cf-profile-link" href="/profile/" style="display:none;">Profile</a>
           <div id="cf-user-button" style="display:none;"></div>
         </div>
-      </div>
+        <button class="cf-shell-mobile-toggle" id="cf-shell-mobile-toggle" aria-label="Toggle menu" type="button">
+          <span class="cf-hamburger-line"></span>
+          <span class="cf-hamburger-line"></span>
+          <span class="cf-hamburger-line"></span>
+        </button>
+      </nav>
     </header>
+    <div class="cf-shell-mobile-menu" id="cf-shell-mobile-menu">
+      <div class="cf-shell-mobile-links">${navLinks}</div>
+      <div class="cf-shell-mobile-actions">
+        <button class="cf-shell-btn-solid" id="cf-mobile-login-btn">Sign In</button>
+        <button class="cf-shell-btn-outline" id="cf-mobile-register-btn">Get Started</button>
+        <a class="cf-shell-btn-outline" id="cf-mobile-profile-link" href="/profile/" style="display:none;">Profile</a>
+      </div>
+    </div>
     <div class="cf-feature-gate" id="cf-feature-gate" aria-hidden="true">
       <div class="cf-feature-gate-card">
         <h3>Login Required</h3>
         <p>Please sign in or create an account to use this feature.</p>
         <div class="cf-feature-gate-actions">
-          <button class="cf-shell-btn" id="cf-gate-login">Login</button>
-          <button class="cf-shell-btn" id="cf-gate-register">Register</button>
+          <button class="cf-shell-btn-outline" id="cf-gate-login">Sign In</button>
+          <button class="cf-shell-btn-solid" id="cf-gate-register">Get Started</button>
           <a class="cf-shell-link" href="/">Back to Home</a>
         </div>
       </div>
@@ -218,7 +232,7 @@ function shellMarkup(activeKey) {
             <ul class="cf-plan-usage-list" id="cf-plan-usage-list"></ul>
             <ul class="cf-plan-features" id="cf-plan-free-features"></ul>
             <div class="cf-plan-actions">
-              <button class="cf-shell-btn" id="cf-plan-free-btn" type="button">Select Free Plan</button>
+              <button class="cf-shell-btn-outline" id="cf-plan-free-btn" type="button">Select Free Plan</button>
               <a class="cf-shell-link" href="/profile/">Open Dashboard</a>
             </div>
           </section>
@@ -231,7 +245,7 @@ function shellMarkup(activeKey) {
             <div class="cf-plan-tier-copy" id="cf-plan-pro-copy">Plan details loading.</div>
             <ul class="cf-plan-features" id="cf-plan-pro-features"></ul>
             <div class="cf-plan-actions">
-              <button class="cf-shell-btn" id="cf-plan-pro-btn" type="button">Upgrade to Pro</button>
+              <button class="cf-shell-btn-outline" id="cf-plan-pro-btn" type="button">Upgrade to Pro</button>
             </div>
           </section>
           <section class="cf-plan-tier" id="cf-plan-tier-max">
@@ -240,7 +254,7 @@ function shellMarkup(activeKey) {
             <div class="cf-plan-tier-copy" id="cf-plan-max-copy">Plan details loading.</div>
             <ul class="cf-plan-features" id="cf-plan-max-features"></ul>
             <div class="cf-plan-actions">
-              <button class="cf-shell-btn" id="cf-plan-max-btn" type="button">Upgrade to Max</button>
+              <button class="cf-shell-btn-outline" id="cf-plan-max-btn" type="button">Upgrade to Max</button>
             </div>
           </section>
         </div>
@@ -675,9 +689,28 @@ function openAuthModal(view) {
 function attachShellEvents() {
   document.getElementById('cf-login-btn')?.addEventListener('click', () => openAuthModal('signIn'));
   document.getElementById('cf-register-btn')?.addEventListener('click', () => openAuthModal('signUp'));
+  document.getElementById('cf-mobile-login-btn')?.addEventListener('click', () => openAuthModal('signIn'));
+  document.getElementById('cf-mobile-register-btn')?.addEventListener('click', () => openAuthModal('signUp'));
   document.getElementById('cf-gate-login')?.addEventListener('click', () => openAuthModal('signIn'));
   document.getElementById('cf-gate-register')?.addEventListener('click', () => openAuthModal('signUp'));
   document.getElementById('cf-plan-modal-close')?.addEventListener('click', closePlanSelectionModal);
+
+  const mobileToggle = document.getElementById('cf-shell-mobile-toggle');
+  const mobileMenu = document.getElementById('cf-shell-mobile-menu');
+
+  mobileToggle?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('open');
+    mobileToggle?.classList.toggle('open');
+  });
+
+  // Close mobile menu when any link inside it is clicked
+  mobileMenu?.addEventListener('click', (event) => {
+    const anchor = event.target.closest('a');
+    if (anchor) {
+      mobileMenu.classList.remove('open');
+      mobileToggle?.classList.remove('open');
+    }
+  });
 
   document.addEventListener('click', (event) => {
     const anchor = event.target.closest('a[href]');
@@ -710,17 +743,18 @@ function updateFeatureAccess() {
 }
 
 function updateAuthUI() {
-  const loginBtn = document.getElementById('cf-login-btn');
-  const registerBtn = document.getElementById('cf-register-btn');
+  const loginBtns = ['cf-login-btn', 'cf-mobile-login-btn'].map(id => document.getElementById(id)).filter(Boolean);
+  const registerBtns = ['cf-register-btn', 'cf-mobile-register-btn'].map(id => document.getElementById(id)).filter(Boolean);
+  const profileLinks = ['cf-profile-link', 'cf-mobile-profile-link'].map(id => document.getElementById(id)).filter(Boolean);
   const userButton = document.getElementById('cf-user-button');
 
-  if (!loginBtn || !registerBtn || !userButton || !clerk) return;
+  if (!userButton || !clerk) return;
 
   if (clerk.isSignedIn) {
-    loginBtn.style.display = 'none';
-    registerBtn.style.display = 'none';
+    loginBtns.forEach(el => el.style.display = 'none');
+    registerBtns.forEach(el => el.style.display = 'none');
+    profileLinks.forEach(el => el.style.display = 'inline-flex');
     userButton.style.display = 'block';
-    document.getElementById('cf-profile-link').style.display = 'inline-flex';
     userButton.innerHTML = '';
     clerk.mountUserButton(userButton, {
       userProfileMode: 'modal',
@@ -757,9 +791,9 @@ function updateAuthUI() {
       // no-op
     }
     userButton.style.display = 'none';
-    document.getElementById('cf-profile-link').style.display = 'none';
-    loginBtn.style.display = 'inline-flex';
-    registerBtn.style.display = 'inline-flex';
+    profileLinks.forEach(el => el.style.display = 'none');
+    loginBtns.forEach(el => el.style.display = 'inline-flex');
+    registerBtns.forEach(el => el.style.display = 'inline-flex');
   }
 
   updateFeatureAccess();
