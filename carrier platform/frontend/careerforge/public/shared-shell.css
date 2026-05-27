@@ -38,7 +38,7 @@ body.cf-shell-enabled {
 }
 
 .cf-shell-inner {
-  max-width: 1120px;
+  max-width: 1024px;
   margin: 0 auto;
   height: 100%;
   padding: 0 16px;
@@ -674,6 +674,21 @@ body.cf-shell-enabled .mobile-menu {
   display: none !important;
 }
 
+:root {
+  scroll-behavior: smooth;
+}
+
+html {
+  overflow-y: auto;
+}
+
+body.cf-shell-enabled {
+  background: #000;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+
 /* Shared look across feature pages */
 body[data-cf-page="resume-builder"],
 body[data-cf-page="resume-analyzer"],
@@ -710,6 +725,277 @@ body[data-cf-page="interviewer"] .screen {
   min-height: calc(100vh - 66px);
 }
 
+body[data-cf-page="resume-analyzer"] {
+  display: block;
+  overflow-y: auto;
+}
+
+body[data-cf-page="resume-analyzer"] .screen.active {
+  height: auto;
+  min-height: calc(100dvh - 66px);
+}
+
+/* Footer shared across all feature pages */
+.cf-shell-footer {
+  margin-top: 32px;
+  padding: 32px 0 20px;
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+}
+
+.cf-shell-footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr);
+  gap: 28px;
+}
+
+.cf-shell-footer-brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cf-shell-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.cf-shell-footer-copy {
+  max-width: 320px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+}
+
+.cf-shell-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.cf-shell-footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cf-shell-footer-column h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 2px;
+}
+
+.cf-shell-footer-column a {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.cf-shell-footer-column a:hover {
+  color: hsl(var(--foreground));
+}
+
+.cf-shell-footer-bottom {
+  max-width: 1120px;
+  margin: 20px auto 0;
+  padding: 16px 16px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+
+/* Landing-page button feel for feature CTAs */
+body.cf-shell-enabled :is(
+  .btn,
+  .btn-primary,
+  .cl-generate-btn,
+  .cl-download-btn,
+  .cl-back-btn,
+  .cl-upload-btn,
+  .cl-change-btn,
+  .jl-apply-filters,
+  .jl-fetch-btn,
+  .jl-refresh-btn,
+  .jl-clear-filters,
+  .pf-plan-btn,
+  .pf-upload-btn,
+  .pf-upload-submit,
+  .rs-change,
+  .ctrl-btn,
+  .btn-restart,
+  .demo-btn,
+  .hmbtn,
+  #generateBtn,
+  #downloadBtn,
+  #editLatexBtn,
+  #startBtn,
+  #deviceContinueBtn,
+  #submitBtn,
+  .jd-feature-btn
+) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: calc(var(--radius) * 1.5);
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+body.cf-shell-enabled :is(
+  .btn,
+  .btn-primary,
+  .cl-generate-btn,
+  .cl-download-btn,
+  .cl-back-btn,
+  .cl-upload-btn,
+  .cl-change-btn,
+  .jl-apply-filters,
+  .jl-fetch-btn,
+  .jl-refresh-btn,
+  .jl-clear-filters,
+  .pf-plan-btn,
+  .pf-upload-btn,
+  .pf-upload-submit,
+  .rs-change,
+  .ctrl-btn,
+  .btn-restart,
+  .demo-btn,
+  .hmbtn,
+  #generateBtn,
+  #downloadBtn,
+  #editLatexBtn,
+  #startBtn,
+  #deviceContinueBtn,
+  #submitBtn,
+  .jd-feature-btn
+):hover:not(:disabled) {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-color: hsl(var(--border));
+}
+
+body.cf-shell-enabled :is(
+  .btn,
+  .btn-primary,
+  .cl-generate-btn,
+  .cl-download-btn,
+  .cl-back-btn,
+  .cl-upload-btn,
+  .cl-change-btn,
+  .jl-apply-filters,
+  .jl-fetch-btn,
+  .jl-refresh-btn,
+  .jl-clear-filters,
+  .pf-plan-btn,
+  .pf-upload-btn,
+  .pf-upload-submit,
+  .rs-change,
+  .ctrl-btn,
+  .btn-restart,
+  .demo-btn,
+  .hmbtn,
+  #generateBtn,
+  #downloadBtn,
+  #editLatexBtn,
+  #startBtn,
+  #deviceContinueBtn,
+  #submitBtn,
+  .jd-feature-btn
+):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+body.cf-shell-enabled :is(
+  .btn-primary,
+  .cl-generate-btn,
+  .cl-download-btn,
+  .pf-upload-submit,
+  .jl-apply-filters,
+  .jl-fetch-btn,
+  .jl-refresh-btn,
+  #generateBtn,
+  #downloadBtn,
+  #editLatexBtn,
+  #startBtn,
+  #deviceContinueBtn,
+  #submitBtn,
+  .jd-feature-btn
+) {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+body.cf-shell-enabled :is(
+  .btn-primary,
+  .cl-generate-btn,
+  .cl-download-btn,
+  .pf-upload-submit,
+  .jl-apply-filters,
+  .jl-fetch-btn,
+  .jl-refresh-btn,
+  #generateBtn,
+  #downloadBtn,
+  #editLatexBtn,
+  #startBtn,
+  #deviceContinueBtn,
+  #submitBtn,
+  .jd-feature-btn
+):hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.9);
+  color: hsl(var(--primary-foreground));
+}
+
+body.cf-shell-enabled :is(
+  .btn,
+  .cl-back-btn,
+  .cl-upload-btn,
+  .cl-change-btn,
+  .jl-clear-filters,
+  .pf-plan-btn,
+  .pf-upload-btn,
+  .rs-change,
+  .ctrl-btn,
+  .btn-restart,
+  .demo-btn,
+  .hmbtn
+) {
+  background: hsl(var(--background));
+}
+
+body.cf-shell-enabled .cf-shell-footer a,
+body.cf-shell-enabled .cf-shell-footer p {
+  font-family: inherit;
+}
+
 @media (max-width: 980px) {
   .cf-shell-inner {
     flex-wrap: wrap;
@@ -735,6 +1021,14 @@ body[data-cf-page="interviewer"] .screen {
   body[data-cf-page="resume-analyzer"] .main-container {
     max-height: calc(100dvh - 132px);
   }
+
+  .cf-shell-footer-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-shell-footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -744,6 +1038,14 @@ body[data-cf-page="interviewer"] .screen {
 
   .cf-plan-modal-grid {
     grid-template-columns: 1fr;
+  }
+
+  .cf-shell-footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-shell-footer-bottom {
+    flex-direction: column;
   }
 }
 

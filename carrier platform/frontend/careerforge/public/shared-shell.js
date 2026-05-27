@@ -175,9 +175,6 @@ function shellMarkup(activeKey) {
     <header class="cf-shell-nav">
       <nav class="cf-shell-inner">
         <a class="cf-shell-brand" href="/">
-          <svg class="cf-shell-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9.937 3.343a2 2 0 0 1 4.126 0l.365 2.555a2 2 0 0 0 1.674 1.674l2.555.365a2 2 0 0 1 0 4.126l-2.555.365a2 2 0 0 0-1.674 1.674l-.365 2.555a2 2 0 0 1-4.126 0l-.365-2.555a2 2 0 0 0-1.674-1.674l-2.555-.365a2 2 0 0 1 0-4.126l2.555-.365a2 2 0 0 0 1.674-1.674l.365-2.555z"/>
-          </svg>
           <span>CareerForge</span>
         </a>
         <div class="cf-shell-links" id="cf-shell-links">${navLinks}</div>
@@ -261,6 +258,48 @@ function shellMarkup(activeKey) {
         <p class="cf-plan-payment-status" id="cf-plan-payment-status"></p>
       </div>
     </div>
+  `;
+}
+
+function footerMarkup() {
+  return `
+    <footer class="cf-shell-footer">
+      <div class="cf-shell-footer-inner">
+        <div class="cf-shell-footer-brand-block">
+          <a class="cf-shell-footer-brand" href="/">
+            <span>CareerForge</span>
+          </a>
+          <p class="cf-shell-footer-copy">AI-powered career development ecosystem. Build, analyze, and optimize your career journey.</p>
+        </div>
+        <div class="cf-shell-footer-grid">
+          <div class="cf-shell-footer-column">
+            <h3>Platform</h3>
+            <a href="/">Home</a>
+            <a href="/resume-builder/">Resume Builder</a>
+            <a href="/resume-analyzer/">Resume Analyzer</a>
+            <a href="/cover-letter/">Cover Letter</a>
+          </div>
+          <div class="cf-shell-footer-column">
+            <h3>Tools</h3>
+            <a href="/interviewer/">Interviewer</a>
+            <a href="/job-listings/">Job Listings</a>
+            <a href="/leaderboard/">Leaderboard</a>
+            <a href="/profile/">Profile</a>
+          </div>
+          <div class="cf-shell-footer-column">
+            <h3>Support</h3>
+            <a href="#">Features</a>
+            <a href="#">Pricing</a>
+            <a href="#">About</a>
+            <a href="#">FAQ</a>
+          </div>
+        </div>
+      </div>
+      <div class="cf-shell-footer-bottom">
+        <p>&copy; ${new Date().getFullYear()} CareerForge. All rights reserved.</p>
+        <p>Built for the next generation of careers.</p>
+      </div>
+    </footer>
   `;
 }
 
@@ -611,6 +650,7 @@ function mountShell() {
   document.body.dataset.cfPage = activeKey;
   document.body.classList.add('cf-shell-enabled');
   document.body.insertAdjacentHTML('afterbegin', shellMarkup(activeKey));
+  document.body.insertAdjacentHTML('beforeend', footerMarkup());
 }
 
 async function loadClerkUIBundle(publishableKey) {
