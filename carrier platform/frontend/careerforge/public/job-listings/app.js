@@ -169,7 +169,7 @@ function showUploadState(label) {
   if (resumeLoaded) resumeLoaded.style.display = "block";
   if (resumeLoadedLabel) resumeLoadedLabel.textContent = "Resume stored";
   if (resumeLoadedMeta) resumeLoadedMeta.textContent = label;
-  if (savedResumeSelect) savedResumeSelect.value = "";
+  if (savedResumeSelect && savedResumeSelect.value) savedResumeSelect.value = "";
   if (savedResumeStatus) savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
   if (savedResumeHint) savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
   activeResumeSource = "upload";

@@ -108,7 +108,7 @@ body {
 /* HEADER */
 .header-section {
     padding: 14px 18px 12px;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    background: rgba(0, 0, 0, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
 }
@@ -707,12 +707,11 @@ button#tlr:active {
     width: 90%;
     max-width: 1400px;
     height: 85vh;
-    background: linear-gradient(145deg, #1a1a2e 0%, #16162a 50%, #0f0f1a 100%);
+    background: hsl(var(--card));
     border-radius: 24px;
     box-shadow: 
-        0 0 0 1px rgba(139, 92, 246, 0.15),
-        0 25px 80px -20px rgba(139, 92, 246, 0.3),
-        0 0 60px rgba(236, 72, 153, 0.1);
+        0 0 0 1px hsl(var(--border)),
+        0 25px 80px -20px rgba(0, 0, 0, 0.5);
     display: grid;
     grid-template-columns: 380px 1fr;
     overflow: hidden;
@@ -819,7 +818,7 @@ button#tlr:active {
 }
 
 .overlay-right::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3);
+    background: rgba(217, 216, 255, 0.3);
     border-radius: 3px;
 }
 
@@ -833,7 +832,7 @@ button#tlr:active {
     font-weight: 700;
     color: #ffffff;
     margin: 0 0 6px 0;
-    background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #e6d4f4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -859,8 +858,8 @@ button#tlr:active {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.05));
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    background: linear-gradient(145deg, rgba(217, 216, 255, 0.1), rgba(230, 212, 244, 0.05));
+    border: 1px solid rgba(217, 216, 255, 0.2);
     border-radius: 20px;
 }
 
@@ -917,13 +916,13 @@ button#tlr:active {
 .score-verdict {
     margin-top: 16px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0.1));
-    border: 1px solid rgba(124, 58, 237, 0.3);
+    background: linear-gradient(135deg, rgba(217, 216, 255, 0.2), rgba(230, 212, 244, 0.1));
+    border: 1px solid rgba(217, 216, 255, 0.3);
     border-radius: 12px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 600;
-    color: #a78bfa;
+    color: #e6d4f4;
     text-align: center;
 }
 
@@ -953,7 +952,7 @@ button#tlr:active {
 
 .category-label .category-score {
     font-weight: 600;
-    color: #a78bfa;
+    color: #e6d4f4;
 }
 
 .category-bar {
@@ -971,11 +970,11 @@ button#tlr:active {
 
 .category-bar-fill.ats { 
     width: 88%; 
-    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    background: linear-gradient(90deg, #d9d8ff, #e6d4f4);
 }
 .category-bar-fill.hard-skills { 
     width: 72%; 
-    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    background: linear-gradient(90deg, #e6d4f4, #f5c1d8);
 }
 .category-bar-fill.soft-skills { 
     width: 65%; 
@@ -987,7 +986,7 @@ button#tlr:active {
 }
 .category-bar-fill.job-match { 
     width: 77%; 
-    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    background: linear-gradient(90deg, #f5c1d8, #d9d8ff);
 }
 
 .analysis-section {
@@ -1015,7 +1014,7 @@ button#tlr:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.1));
+    background: linear-gradient(135deg, rgba(217, 216, 255, 0.2), rgba(230, 212, 244, 0.1));
     border-radius: 10px;
     font-size: 14px;
 }
@@ -1036,7 +1035,7 @@ button#tlr:active {
 
 .skill-card:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(139, 92, 246, 0.3);
+    border-color: rgba(217, 216, 255, 0.4);
     transform: translateY(-2px);
 }
 
@@ -1068,7 +1067,7 @@ button#tlr:active {
 }
 
 .skill-importance.medium {
-    color: #8b5cf6;
+    color: #e6d4f4;
 }
 
 .skill-importance.low {

@@ -43,7 +43,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(10, 10, 18, 0.85);
+      background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
@@ -53,17 +53,11 @@
       width: 90%;
       max-width: 1400px;
       height: 85vh;
-      background: linear-gradient(
-        145deg,
-        #1a1a2e 0%,
-        #16162a 50%,
-        #0f0f1a 100%
-      );
+      background: hsl(var(--card));
       border-radius: 24px;
       box-shadow:
-        0 0 0 1px rgba(139, 92, 246, 0.15),
-        0 25px 80px -20px rgba(139, 92, 246, 0.3),
-        0 0 60px rgba(236, 72, 153, 0.1);
+        0 0 0 1px hsl(var(--border)),
+        0 25px 80px -20px rgba(0, 0, 0, 0.5);
       display: grid;
       grid-template-columns: 380px 1fr;
       overflow: hidden;
@@ -186,7 +180,7 @@
     }
 
     .overlay-right::-webkit-scrollbar-thumb {
-      background: rgba(139, 92, 246, 0.3);
+      background: rgba(217, 216, 255, 0.3);
       border-radius: 3px;
     }
 
@@ -200,7 +194,7 @@
       font-weight: 700;
       color: #ffffff;
       margin: 0 0 6px 0;
-      background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #e6d4f4 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -229,10 +223,10 @@
       padding: 24px;
       background: linear-gradient(
         145deg,
-        rgba(139, 92, 246, 0.1),
-        rgba(236, 72, 153, 0.05)
+        rgba(217, 216, 255, 0.1),
+        rgba(230, 212, 244, 0.05)
       );
-      border: 1px solid rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(217, 216, 255, 0.2);
       border-radius: 20px;
     }
 
@@ -291,15 +285,15 @@
       padding: 8px 16px;
       background: linear-gradient(
         135deg,
-        rgba(251, 191, 36, 0.2),
-        rgba(251, 191, 36, 0.1)
+        rgba(217, 216, 255, 0.2),
+        rgba(230, 212, 244, 0.1)
       );
-      border: 1px solid rgba(251, 191, 36, 0.3);
+      border: 1px solid rgba(217, 216, 255, 0.3);
       border-radius: 12px;
       font-family: "Inter", sans-serif;
       font-size: 12px;
       font-weight: 600;
-      color: #fbbf24;
+      color: #e6d4f4;
       text-align: center;
     }
 
@@ -330,7 +324,7 @@
 
     .category-label .category-score {
       font-weight: 600;
-      color: #a78bfa;
+      color: #e6d4f4;
     }
 
     .category-bar {
@@ -348,11 +342,11 @@
 
     .category-bar-fill.ats {
       width: 88%;
-      background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+      background: linear-gradient(90deg, #d9d8ff, #e6d4f4);
     }
     .category-bar-fill.hard-skills {
       width: 72%;
-      background: linear-gradient(90deg, #ec4899, #f472b6);
+      background: linear-gradient(90deg, #e6d4f4, #f5c1d8);
     }
     .category-bar-fill.soft-skills {
       width: 65%;
@@ -364,7 +358,7 @@
     }
     .category-bar-fill.job-match {
       width: 77%;
-      background: linear-gradient(90deg, #fbbf24, #fcd34d);
+      background: linear-gradient(90deg, #f5c1d8, #d9d8ff);
     }
 
     /* Section Cards */
@@ -395,8 +389,8 @@
       justify-content: center;
       background: linear-gradient(
         135deg,
-        rgba(139, 92, 246, 0.2),
-        rgba(236, 72, 153, 0.1)
+        rgba(217, 216, 255, 0.2),
+        rgba(230, 212, 244, 0.1)
       );
       border-radius: 10px;
       font-size: 14px;
@@ -419,7 +413,7 @@
 
     .skill-card:hover {
       background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(139, 92, 246, 0.3);
+      border-color: rgba(217, 216, 255, 0.4);
       transform: translateY(-2px);
     }
 
@@ -451,7 +445,7 @@
     }
 
     .skill-importance.medium {
-      color: #fbbf24;
+      color: #e6d4f4;
     }
 
     .skill-importance.low {
@@ -487,7 +481,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(236, 72, 153, 0.15);
+      background: rgba(230, 212, 244, 0.15);
       border-radius: 8px;
       font-size: 12px;
     }
@@ -517,8 +511,8 @@
     }
 
     .suggestion-item:hover {
-      background: rgba(139, 92, 246, 0.08);
-      border-color: rgba(139, 92, 246, 0.2);
+      background: rgba(217, 216, 255, 0.08);
+      border-color: rgba(217, 216, 255, 0.2);
     }
 
     .suggestion-checkbox {
@@ -526,7 +520,7 @@
       height: 20px;
       min-width: 20px;
       background: rgba(255, 255, 255, 0.05);
-      border: 2px solid rgba(139, 92, 246, 0.4);
+      border: 2px solid rgba(217, 216, 255, 0.4);
       border-radius: 6px;
       margin-top: 2px;
     }
@@ -584,10 +578,10 @@
     .preferred-skill-card {
       background: linear-gradient(
         180deg,
-        rgba(120, 80, 255, 0.08),
-        rgba(120, 80, 255, 0.03)
+        rgba(217, 216, 255, 0.08),
+        rgba(230, 212, 244, 0.03)
       );
-      border: 1px solid rgba(160, 140, 255, 0.25);
+      border: 1px solid rgba(217, 216, 255, 0.25);
       border-radius: 14px;
       padding: 14px;
     }
@@ -616,9 +610,7 @@
       <!-- LEFT SIDEBAR -->
       <aside class="sidebar animate-entry delay-1">
         <div class="header-section animate-entry delay-2">
-          <div class="header-top">
-            <a href="/" class="home-btn">← Home</a>
-          </div>
+          
 
           <h1>Resume Gap Hunter</h1>
           <p>AI-Powered Skill Optimizer</p>
@@ -626,7 +618,7 @@
 
         <div class="scrollable-content animate-entry delay-3">
           <div class="form-section">
-            <h2 class="section-title">Configuration</h2>
+           
 
             <h2 class="section-title">Job Details</h2>
 
@@ -722,9 +714,9 @@
                     x2="100%"
                     y2="100%"
                   >
-                    <stop offset="0%" stop-color="#8b5cf6" />
-                    <stop offset="50%" stop-color="#ec4899" />
-                    <stop offset="100%" stop-color="#fbbf24" />
+                    <stop offset="0%" stop-color="#d9d8ff" />
+                    <stop offset="50%" stop-color="#e6d4f4" />
+                    <stop offset="100%" stop-color="#f5c1d8" />
                   </linearGradient>
                 </defs>
                 <circle
@@ -903,9 +895,9 @@
                       x2="100%"
                       y2="100%"
                     >
-                      <stop offset="0%" stop-color="#8b5cf6" />
-                      <stop offset="50%" stop-color="#ec4899" />
-                      <stop offset="100%" stop-color="#fbbf24" />
+                      <stop offset="0%" stop-color="#d9d8ff" />
+                      <stop offset="50%" stop-color="#e6d4f4" />
+                      <stop offset="100%" stop-color="#f5c1d8" />
                     </linearGradient>
                   </defs>
                   <circle class="score-ring-bg" cx="70" cy="70" r="60" />

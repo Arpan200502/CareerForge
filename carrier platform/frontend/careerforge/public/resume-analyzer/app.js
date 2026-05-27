@@ -136,7 +136,7 @@ function showUploadState(label) {
   if (pdfChars) pdfChars.textContent = `(${lastResumeText.length.toLocaleString()} chars)`;
   if (pdfPreview) pdfPreview.style.display = "flex";
   if (dropText) dropText.textContent = "Resume uploaded ✓";
-  if (savedResumeSelect) savedResumeSelect.value = "";
+  if (savedResumeSelect && savedResumeSelect.value) savedResumeSelect.value = "";
   if (savedResumeStatus) savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
   if (savedResumeHint) savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
   if (pdfSourceStatus) pdfSourceStatus.textContent = `Using ${label}.`;
@@ -201,7 +201,6 @@ async function useSavedResume(resumeId) {
     const savedFile = new File([blob], `${selected?.title || "saved-resume"}.pdf`, { type: "application/pdf" });
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(savedFile);
-    pdf.files = dataTransfer.files;
     savedResumeSelect.value = resumeId;
     savedResumeStatus.textContent = `Using ${selected?.title || "the selected saved resume"}.`;
     savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
@@ -213,9 +212,22 @@ async function useSavedResume(resumeId) {
 }
 
 btn.onclick = async function () {
-  if (!lastResumeText) {
+  if (!lastResumeText && !pdf.files?.[0] && !activeResumeBlob) {
     alert("please upload a file or choose a saved resume");
     return;
+  }
+
+  // If we have a file/blob but no text yet, extract it now
+  if (!lastResumeText) {
+    const file = activeResumeBlob || pdf.files?.[0];
+    if (file) {
+      try {
+        lastResumeText = await extractPdfText(file);
+      } catch {
+        alert("Could not read the resume file. Try uploading again.");
+        return;
+      }
+    }
   }
 
   document.querySelector(".aipnl").style.display = "block";
@@ -754,7 +766,6 @@ if (pdf) {
     if (!file) return;
     activeResumeBlob = file;
     pdfSourceStatus.textContent = `Reading ${file.name}...`;
-    savedResumeSelect.value = "";
     savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
     savedResumeHint.textContent = "Read-only selection. Nothing is written back to your Profile.";
 

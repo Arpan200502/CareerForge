@@ -43,7 +43,7 @@ function clearUploadSelection() {
 }
 
 function clearSavedSelection() {
-  savedResumeSelect.value = "";
+  if (savedResumeSelect.value) savedResumeSelect.value = "";
   savedResumeStatus.textContent = savedResumeHint.textContent || "Select a saved resume from your Profile.";
 }
 
@@ -108,7 +108,7 @@ resumeUpload.addEventListener("change", async (e) => {
   try {
     resumeText = await extractPdfText(file);
     activeResumeName = file.name;
-    clearSavedSelection();
+    savedResumeStatus.textContent = "Pick a saved resume to use it instead of the uploaded file.";
     fileName.textContent = file.name;
     uploadArea.style.display = "none";
     fileLoaded.style.display = "flex";
@@ -135,8 +135,20 @@ async function generateCoverLetter() {
   const title = jobTitle.value.trim();
   const desc = jobDesc.value.trim();
 
-  if (!resumeText) { alert("Please upload your resume PDF."); return; }
+  if (!resumeText && !resumeUpload.files?.[0]) { alert("Please upload your resume PDF."); return; }
   if (!desc) { alert("Please enter a job description."); return; }
+
+  if (!resumeText) {
+    const file = resumeUpload.files[0];
+    if (file) {
+      try {
+        resumeText = await extractPdfText(file);
+      } catch {
+        alert("Could not read the resume file. Try uploading again.");
+        return;
+      }
+    }
+  }
 
   setup.style.display = "none";
   loading.style.display = "block";

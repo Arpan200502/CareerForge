@@ -14,7 +14,6 @@ const publicLinks = [
 ];
 
 const privateLinks = [
-  { label: "Home", href: "/" },
   { label: "Resume Builder", href: "/resume-builder/" },
   { label: "Resume Analyzer", href: "/resume-analyzer/" },
   { label: "Cover Letter", href: "/cover-letter/" },
@@ -88,18 +87,31 @@ export function Header() {
                     variables: {
                       colorPrimary: "#57d6ff",
                       colorBackground: "#0b1222",
+                      colorInputBackground: "#101a31",
                       colorText: "#f1f5f9",
                       colorTextSecondary: "#94a3b8",
-                      colorInputBackground: "#101a31",
                       colorInputText: "#f1f5f9",
                     },
                     elements: {
                       card: "border: 1px solid rgba(87, 214, 255, 0.25)",
                       headerTitle: "color: #f1f5f9",
                       headerSubtitle: "color: #94a3b8",
+                      dividerText: "color: #64748b",
+                      footerActionText: "color: #94a3b8",
+                      footerActionLink: "color: #57d6ff",
                       formFieldLabel: "color: #cbd5e1",
                       formFieldInput: "color: #f1f5f9",
+                      socialButtonsBlockButton: "color: #f1f5f9; border-color: rgba(148,163,184,0.25)",
+                      socialButtonsBlockButtonText: "color: #f1f5f9",
                       formButtonPrimary: "background: linear-gradient(135deg, #57d6ff 0%, #7c3aed 100%); color: #071126; border: none",
+                      alertText: "color: #f1f5f9",
+                      identityPreviewText: "color: #f1f5f9",
+                      userPreviewUsername: "color: #f1f5f9",
+                      userPreviewIdentifier: "color: #94a3b8",
+                      userButtonPopoverCard: "background: #0b1222; border: 1px solid rgba(87, 214, 255, 0.25)",
+                      userButtonPopoverActionItem: "color: #f1f5f9",
+                      userButtonPopoverActionItemText: "color: #f1f5f9",
+                      userButtonPopoverFooter: "color: #94a3b8",
                     },
                   }}
                 />
