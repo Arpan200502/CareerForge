@@ -89,16 +89,27 @@ export default function Home() {
   const [animDone, setAnimDone] = useState(false);
 
   useEffect(() => {
-    const maxTimeout = setTimeout(() => setLoading(false), 12000);
+    if (sessionStorage.getItem("cf_preloader_shown")) {
+      setLoading(false);
+      return;
+    }
+    const maxTimeout = setTimeout(() => {
+      sessionStorage.setItem("cf_preloader_shown", "1");
+      setLoading(false);
+    }, 12000);
     return () => clearTimeout(maxTimeout);
   }, []);
 
   useEffect(() => {
+    if (!loading) return;
     if (splineReady && animDone) {
-      const grace = setTimeout(() => setLoading(false), 400);
+      const grace = setTimeout(() => {
+        sessionStorage.setItem("cf_preloader_shown", "1");
+        setLoading(false);
+      }, 400);
       return () => clearTimeout(grace);
     }
-  }, [splineReady, animDone]);
+  }, [splineReady, animDone, loading]);
     return (
       <AnimatePresence mode="wait">
         {loading ? (
@@ -132,7 +143,7 @@ export default function Home() {
                 interview preparation, cover letter generation, and job discovery into one seamless platform.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href={`${process.env.NEXT_PUBLIC_FEATURE_PAGES_URL || 'http://localhost:5001'}/resume-builder/`}>
+                <a href="/resume-builder/">
                   <ButtonColorful label="Start Building Your Career" />
                 </a>
               </div>
@@ -208,7 +219,7 @@ export default function Home() {
               Join thousands of professionals who have accelerated their job search with AI-powered tools.
             </p>
             <div className="flex justify-center">
-              <a href={`${process.env.NEXT_PUBLIC_FEATURE_PAGES_URL || 'http://localhost:5001'}/resume-builder/`}>
+              <a href="/resume-builder/">
                 <ButtonColorful label="Get Started Free →" className="h-12 px-8 text-base" />
               </a>
             </div>

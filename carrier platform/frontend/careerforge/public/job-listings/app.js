@@ -289,7 +289,12 @@ fetchNewBtn.addEventListener("click", async () => {
   fetchNewBtn.textContent = "Fetching...";
   sourceInfo.textContent = "Fetching jobs from all platforms... (check server console)";
   try {
-    const resp = await fetch(`${SERVER_URL}/api/run-fetch`, { method: "POST" });
+    await waitForAuth();
+    const headers = await window.__getAuthHeaders();
+    const resp = await fetch(`${SERVER_URL}/api/run-fetch`, {
+      method: "POST",
+      headers: headers.Authorization ? { ...headers } : {},
+    });
     const data = await resp.json();
     if (data.success) {
       sourceInfo.textContent = "Fetch started! Click Refresh in 2-3 mins to load new jobs.";
@@ -420,10 +425,35 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
+async function waitForAuth() {
+  for (let i = 0; i < 80; i++) {
+    if (window.__getAuthHeaders) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error("Auth not ready");
+}
+
+async function isAdminUser() {
+  try {
+    await waitForAuth();
+    const headers = await window.__getAuthHeaders();
+    if (!headers.Authorization) return false;
+    const resp = await fetch(`${SERVER_URL}/api/profile`, { headers });
+    const data = await resp.json();
+    return data.success && data.profile?.role === "admin";
+  } catch {
+    return false;
+  }
+}
+
 // ── Init: always fetch fresh from backend ──
 (async function init() {
   await loadFilterOptions();
   await fetchAndRender(1);
+  const admin = await isAdminUser();
+  if (!admin) {
+    fetchNewBtn.style.display = "none";
+  }
 })();
 
 (async function initSavedResumePicker() {

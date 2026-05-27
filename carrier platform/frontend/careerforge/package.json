@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n careerforge,pages -c cyan,yellow \"next dev\" \"npx serve ../ --listen 5001 --cors\"",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -29,9 +29,7 @@
     "@types/react-dom": "^19.0.0",
     "@types/three": "^0.172.0",
     "autoprefixer": "^10.4.20",
-    "concurrently": "^9.2.1",
     "postcss": "^8.4.49",
-    "serve": "^14.2.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.0"
   }

@@ -1,10 +1,10 @@
-import { Clerk } from '/node_modules/@clerk/clerk-js/dist/clerk.mjs';
+import { Clerk } from 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.mjs';
 
 const CLERK_PUBLISHABLE_KEY = 'pk_test_dGlkeS1hcmFjaG5pZC04Ni5jbGVyay5hY2NvdW50cy5kZXYk';
 window.__SERVER_URL = 'http://localhost:5000';
 
 const links = [
-  { href: '/index.html', label: 'Home', key: 'home' },
+  { href: '/', label: 'Home', key: 'home' },
   { href: '/resume-builder/', label: 'Resume Builder', key: 'resume-builder' },
   { href: '/resume-analyzer/', label: 'Resume Analyzer', key: 'resume-analyzer' },
   { href: '/cover-letter/', label: 'Cover Letter', key: 'cover-letter' },
@@ -175,7 +175,7 @@ function shellMarkup(activeKey) {
   return `
     <header class="cf-shell-nav">
       <div class="cf-shell-inner">
-        <a class="cf-shell-brand" href="/index.html">
+        <a class="cf-shell-brand" href="/">
           <span class="cf-shell-dot"></span>
           <span>Career Forge</span>
         </a>
@@ -195,7 +195,7 @@ function shellMarkup(activeKey) {
         <div class="cf-feature-gate-actions">
           <button class="cf-shell-btn" id="cf-gate-login">Login</button>
           <button class="cf-shell-btn" id="cf-gate-register">Register</button>
-          <a class="cf-shell-link" href="/index.html">Back to Home</a>
+          <a class="cf-shell-link" href="/">Back to Home</a>
         </div>
       </div>
     </div>
@@ -657,14 +657,14 @@ function openAuthModal(view) {
 
   if (view === 'signUp') {
     clerk.openSignUp({
-      signInUrl: '/index.html',
+      signInUrl: '/',
       afterSignInUrl: window.location.href,
       afterSignUpUrl: window.location.href,
       appearance: clerkAppearance,
     });
   } else {
     clerk.openSignIn({
-      signUpUrl: '/index.html',
+      signUpUrl: '/',
       afterSignInUrl: window.location.href,
       afterSignUpUrl: window.location.href,
       appearance: clerkAppearance,
@@ -773,7 +773,7 @@ async function initClerk() {
     ui: { ClerkUI: window.__internal_ClerkUICtor },
     signInFallbackRedirectUrl: window.location.href,
     signUpFallbackRedirectUrl: window.location.href,
-    afterSignOutUrl: '/index.html',
+      afterSignOutUrl: '/',
   });
 
   clerk.addListener(() => updateAuthUI());

@@ -25,9 +25,7 @@ const privateLinks = [
 
 function makeHref(path: string): string {
   if (path.startsWith("#")) return path;
-  if (path === "/") return "/";
-  const base = process.env.NEXT_PUBLIC_FEATURE_PAGES_URL || "http://localhost:5001";
-  return `${base}${path}`;
+  return path;
 }
 
 export function Header() {

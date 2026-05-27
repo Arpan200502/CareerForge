@@ -155,12 +155,20 @@ async function clerkAuthOptional(req, res, next) {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Load altacv.cls once at startup (lives in frontend/resume-builder/)
-const altacvCls = fs.readFileSync("../frontend/resume-builder/altacv.cls", "utf8");
+// Load altacv.cls once at startup (lives in careerforge/public/resume-builder/)
+const altacvCls = fs.readFileSync("../frontend/careerforge/public/resume-builder/altacv.cls", "utf8");
 
 // Middleware
+const allowedOrigin = process.env.FRONTEND_URL;
+const originRegex = /^https?:\/\/localhost(:\d+)?$/;
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: function (origin, callback) {
+    if (!origin || origin === allowedOrigin || originRegex.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -1853,8 +1861,12 @@ Return only the cover letter text.`;
 });
 
 // POST /api/run-fetch — Admin: manually trigger daily fetch
-app.post("/api/run-fetch", async (req, res) => {
+app.post("/api/run-fetch", clerkAuth, async (req, res) => {
   try {
+    const profile = await Profile.findOne({ clerkId: req.auth.userId });
+    if (!profile || profile.role !== "admin") {
+      return res.status(403).json({ success: false, error: "Admin access required" });
+    }
     runJobFetch().catch((err) => console.error("[Admin Fetch] Error:", err.message));
     res.json({ success: true, message: "Job fetch started in background" });
   } catch (error) {
