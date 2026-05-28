@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/cover-letter/" />
+  <link rel="stylesheet" href="/shared-shell.css" />
+  <link rel="stylesheet" href="style.css" />
+  
+  <title>Cover Letter - CareerForge</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="128x128" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+</head>
+<body>
+  <div class="cl-container">
+    <!-- Setup -->
+    <div class="cl-card" id="clSetup">
+      <h1>Cover Letter Generator</h1>
+      <p class="cl-subtitle">Generate a tailored cover letter based on your resume and a job description.</p>
+
+      <div class="cl-section">
+        <label class="cl-label">Resume Source</label>
+        <div class="cf-resume-source-grid">
+          <div class="cf-resume-source-card">
+            <div class="cf-resume-source-title">Upload a new resume</div>
+            <div class="cl-upload-area" id="clUploadArea">
+              <div class="cl-upload-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <p>Drop your resume PDF here or click to browse</p>
+              <input type="file" id="clResumeUpload" accept=".pdf" />
+              <label for="clResumeUpload" class="cl-upload-btn">Choose File</label>
+            </div>
+            <div class="cl-file-loaded" id="clFileLoaded" style="display:none;">
+              <span class="cl-file-check">&#10003;</span>
+              <span id="clFileName">resume.pdf</span>
+              <button class="cl-change-btn" id="clChangeBtn">Change</button>
+            </div>
+            <div class="cf-resume-source-note">Temporary for this page only. It is not saved to your profile.</div>
+          </div>
+
+          <div class="cf-resume-source-card">
+            <div class="cf-resume-source-title">Choose from saved resumes</div>
+            <select id="clSavedResumeSelect" class="cf-resume-source-select">
+              <option value="">Loading saved resumes...</option>
+            </select>
+            <div id="clSavedResumeStatus" class="cf-resume-source-status">Loading your saved resumes...</div>
+            <div id="clSavedResumeHint" class="cf-resume-source-note">Select a saved resume from your Profile.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cl-section">
+        <label class="cl-label" for="clJobTitle">Job Title</label>
+        <input type="text" id="clJobTitle" class="cl-input" placeholder="e.g. Software Engineer" />
+      </div>
+
+      <div class="cl-section">
+        <label class="cl-label" for="clJobDesc">Job Description</label>
+        <textarea id="clJobDesc" class="cl-textarea" rows="8" placeholder="Paste the full job description here..."></textarea>
+      </div>
+
+      <button class="cl-generate-btn" id="clGenerateBtn">Generate Cover Letter</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="cl-card" id="clLoading" style="display:none;">
+      <div class="cl-spinner"></div>
+      <p>Generating your tailored cover letter...</p>
+    </div>
+
+    <!-- Result -->
+    <div class="cl-card" id="clResult" style="display:none;">
+      <div class="cl-result-header">
+        <h2>Your Cover Letter</h2>
+        <div class="cl-result-actions">
+          <button class="cl-download-btn" id="clDownloadBtn">Download PDF</button>
+          <button class="cl-back-btn" id="clBackBtn">Generate New</button>
+        </div>
+      </div>
+      <div class="cl-letter" id="clLetter"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="app.js"></script>
+  <script type="module" src="/shared-shell.js"></script>
+</body>
+</html>
