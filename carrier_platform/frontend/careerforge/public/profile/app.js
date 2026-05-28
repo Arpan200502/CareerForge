@@ -1,4 +1,16 @@
-const SERVER_URL = window.__SERVER_URL || "http://localhost:5000";
+const DEFAULT_SERVER_URL = "http://localhost:5000";
+let SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
+
+async function resolveServerUrl() {
+  if (typeof window.__resolveServerUrl === "function") {
+    try {
+      SERVER_URL = await window.__resolveServerUrl();
+    } catch (err) {
+      console.error("[Profile] Failed to resolve backend URL:", err?.message || err);
+    }
+  }
+  return SERVER_URL;
+}
 
 function formatPlanLabel(plan) {
   return (plan || "free").charAt(0).toUpperCase() + (plan || "free").slice(1);
@@ -62,6 +74,7 @@ async function refreshPlanDashboard(profile) {
 }
 
 async function loadProfile() {
+  const baseUrl = await resolveServerUrl();
   const headers = await window.__getAuthHeaders();
   if (!headers.Authorization) {
     console.warn("[Profile] No auth token found");
@@ -72,7 +85,10 @@ async function loadProfile() {
 
   try {
     console.log("[Profile] Fetching profile...");
-    const resp = await fetch(`${SERVER_URL}/api/profile`, { headers });
+    const resp = await fetch(`${baseUrl}/api/profile`, { headers });
+    if (!resp.ok) {
+      console.error(`[Profile] GET /api/profile failed: ${resp.status} ${resp.statusText}`);
+    }
     const data = await resp.json();
     console.log("[Profile] GET response:", data);
 
@@ -83,10 +99,13 @@ async function loadProfile() {
       const user = window.__getClerkUser();
       console.log("[Profile] Clerk user data:", user);
       if (user) {
-        const createResp = await fetch(`${SERVER_URL}/api/profile`, {
+        const createResp = await fetch(`${baseUrl}/api/profile`, {
           method: "POST",
           headers: { ...headers, "Content-Type": "application/json" },
           body: JSON.stringify({
+                    if (!createResp.ok) {
+                      console.error(`[Profile] POST /api/profile failed: ${createResp.status} ${createResp.statusText}`);
+                    }
             email: user.email,
             username: user.username,
             firstName: user.firstName,
@@ -167,11 +186,15 @@ function renderResumeList(resumes) {
       if (!confirm("Delete this resume?")) return;
       const headers = await window.__getAuthHeaders();
       if (!headers.Authorization) return;
-      await fetch(`${SERVER_URL}/api/profile/resumes/${btn.dataset.id}`, {
+      const baseUrl = await resolveServerUrl();
+      const delResp = await fetch(`${baseUrl}/api/profile/resumes/${btn.dataset.id}`, {
         method: "DELETE",
         headers,
       });
-      const profileResp = await fetch(`${SERVER_URL}/api/profile`, { headers });
+      if (!delResp.ok) {
+        console.error(`[Profile] DELETE resume failed: ${delResp.status} ${delResp.statusText}`);
+      }
+      const profileResp = await fetch(`${baseUrl}/api/profile`, { headers });
       const data = await profileResp.json();
       if (data.success && data.profile) {
         renderResumeList(data.profile.resumes || []);
@@ -183,7 +206,8 @@ function renderResumeList(resumes) {
     btn.addEventListener("click", async () => {
       const headers = await window.__getAuthHeaders();
       if (!headers.Authorization) return;
-      const resp = await fetch(`${SERVER_URL}/api/profile/resumes/${btn.dataset.id}/pdf?dl=0`, { headers });
+      const baseUrl = await resolveServerUrl();
+      const resp = await fetch(`${baseUrl}/api/profile/resumes/${btn.dataset.id}/pdf?dl=0`, { headers });
       if (!resp.ok) return;
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
@@ -194,7 +218,8 @@ function renderResumeList(resumes) {
     btn.addEventListener("click", async () => {
       const headers = await window.__getAuthHeaders();
       if (!headers.Authorization) return;
-      const resp = await fetch(`${SERVER_URL}/api/profile/resumes/${btn.dataset.id}/pdf?dl=1`, { headers });
+      const baseUrl = await resolveServerUrl();
+      const resp = await fetch(`${baseUrl}/api/profile/resumes/${btn.dataset.id}/pdf?dl=1`, { headers });
       if (!resp.ok) return;
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
@@ -252,11 +277,15 @@ document.getElementById("pfUploadBtn").addEventListener("click", async () => {
     formData.append("file", file);
     formData.append("title", title);
 
-    const resp = await fetch(`${SERVER_URL}/api/profile/resumes/upload`, {
+    const baseUrl = await resolveServerUrl();
+    const resp = await fetch(`${baseUrl}/api/profile/resumes/upload`, {
       method: "POST",
       headers: { Authorization: headers.Authorization },
       body: formData,
     });
+    if (!resp.ok) {
+      console.error(`[Profile] Upload resume failed: ${resp.status} ${resp.statusText}`);
+    }
     const data = await resp.json();
 
     if (data.success) {
@@ -265,7 +294,7 @@ document.getElementById("pfUploadBtn").addEventListener("click", async () => {
       fileInput.value = "";
       document.getElementById("pfFileName").textContent = "No file chosen";
       btn.disabled = true;
-      const profileResp = await fetch(`${SERVER_URL}/api/profile`, {
+      const profileResp = await fetch(`${baseUrl}/api/profile`, {
         headers: { Authorization: headers.Authorization },
       });
       const profileData = await profileResp.json();

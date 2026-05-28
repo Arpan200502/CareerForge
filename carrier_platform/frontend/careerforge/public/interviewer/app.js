@@ -5,7 +5,19 @@
 //  • Sarvam AI (via backend for TTS/STT)
 // ═══════════════════════════════════════════════════════════
 
-const SERVER_URL = "https://careerforge-5ktc.onrender.com";
+const DEFAULT_SERVER_URL = "http://localhost:5000";
+let SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
+
+async function resolveServerUrl() {
+  if (typeof window.__resolveServerUrl === "function") {
+    try {
+      SERVER_URL = await window.__resolveServerUrl();
+    } catch (err) {
+      console.error("[Interviewer] Failed to resolve backend URL:", err?.message || err);
+    }
+  }
+  return SERVER_URL;
+}
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -66,7 +78,8 @@ function getShadowIntroText() {
 // Check server health
 async function checkServerHealth() {
   try {
-    const resp = await fetch(`${SERVER_URL}/api/health`);
+    const baseUrl = await resolveServerUrl();
+    const resp = await fetch(`${baseUrl}/api/health`);
     return resp.ok;
   } catch (e) {
     console.error("Server not responding:", e.message);
@@ -76,8 +89,9 @@ async function checkServerHealth() {
 
 // Generate interview questions via server
 async function generateInterviewQuestions(jobDesc, resumeText, intType, difficulty, totalQ) {
+  const baseUrl = await resolveServerUrl();
   const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
-  const resp = await fetch(`${SERVER_URL}/api/generate-questions`, {
+  const resp = await fetch(`${baseUrl}/api/generate-questions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify({
@@ -104,7 +118,8 @@ async function generateInterviewQuestions(jobDesc, resumeText, intType, difficul
 
 // Pre-generate audio for all questions
 async function generateAudiosForAllQuestions(questions, greeting) {
-  const resp = await fetch(`${SERVER_URL}/api/generate-audios`, {
+  const baseUrl = await resolveServerUrl();
+  const resp = await fetch(`${baseUrl}/api/generate-audios`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -123,7 +138,8 @@ async function generateAudiosForAllQuestions(questions, greeting) {
 }
 
 async function generateShadowModeAssets(questions, jobDesc, resumeText, intType, difficulty) {
-  const resp = await fetch(`${SERVER_URL}/api/generate-shadow-mode`, {
+  const baseUrl = await resolveServerUrl();
+  const resp = await fetch(`${baseUrl}/api/generate-shadow-mode`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -146,8 +162,9 @@ async function generateShadowModeAssets(questions, jobDesc, resumeText, intType,
 
 // Analyze interview via server
 async function analyzeInterview(questions, answers, jobDesc, resumeText, intType, difficulty, jobTitle) {
+  const baseUrl = await resolveServerUrl();
   const authHeaders = await window.__getAuthHeaders();
-  const resp = await fetch(`${SERVER_URL}/api/analyze-interview`, {
+  const resp = await fetch(`${baseUrl}/api/analyze-interview`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify({
@@ -172,7 +189,8 @@ async function analyzeInterview(questions, answers, jobDesc, resumeText, intType
 
 // Text-to-Speech via Sarvam (through server)
 async function textToSpeechServer(text) {
-  const resp = await fetch(`${SERVER_URL}/api/text-to-speech`, {
+  const baseUrl = await resolveServerUrl();
+  const resp = await fetch(`${baseUrl}/api/text-to-speech`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text }),
@@ -193,7 +211,8 @@ async function speechToTextServerBlob(blob) {
   const form = new FormData();
   form.append('file', blob, 'audio.wav');
 
-  const resp = await fetch(`${SERVER_URL}/api/speech-to-text`, {
+  const baseUrl = await resolveServerUrl();
+  const resp = await fetch(`${baseUrl}/api/speech-to-text`, {
     method: 'POST',
     body: form,
   });
@@ -209,7 +228,8 @@ async function speechToTextServerBlob(blob) {
 
 // Fallback for base64 if needed
 async function speechToTextServer(audioBase64) {
-  const resp = await fetch(`${SERVER_URL}/api/speech-to-text`, {
+  const baseUrl = await resolveServerUrl();
+  const resp = await fetch(`${baseUrl}/api/speech-to-text`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ audio: audioBase64 }),

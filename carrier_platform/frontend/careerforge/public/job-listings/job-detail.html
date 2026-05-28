@@ -148,9 +148,35 @@
   </div>
 
   <script>
-    var SERVER_URL = "https://careerforge-5ktc.onrender.com";
+    var DEFAULT_SERVER_URL = "http://localhost:5000";
+    var SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
     var lastPdfData = null;
     var lastTailoredText = "";
+
+    function resolveServerUrl() {
+      if (typeof window.__resolveServerUrl === "function") {
+        return window.__resolveServerUrl().then(function(url) {
+          SERVER_URL = url || SERVER_URL;
+          return SERVER_URL;
+        }).catch(function(err) {
+          console.error("[Job Detail] Failed to resolve backend URL:", err && err.message ? err.message : err);
+          return SERVER_URL;
+        });
+      }
+
+      return fetch('/api/runtime-config', { cache: 'no-store' })
+        .then(function(resp) { return resp.json().catch(function() { return {}; }); })
+        .then(function(data) {
+          if (data && data.success && data.backendUrl) {
+            SERVER_URL = data.backendUrl;
+          }
+          return SERVER_URL;
+        })
+        .catch(function(err) {
+          console.error("[Job Detail] Runtime config fetch failed:", err && err.message ? err.message : err);
+          return SERVER_URL;
+        });
+    }
 
     function openPdf() {
       if (!lastPdfData) return;
@@ -173,6 +199,7 @@
     }
 
     function loadJob() {
+      resolveServerUrl().then(function() {
       var stored = null;
       try { stored = JSON.parse(sessionStorage.getItem("jl_selectedJob")); } catch(e) {}
 
@@ -197,7 +224,12 @@
       if (jobId) {
         document.getElementById("jdLoading").style.display = "block";
         fetch(SERVER_URL + "/api/jobs/detail/" + encodeURIComponent(jobId))
-          .then(function(r) { return r.json(); })
+          .then(function(r) {
+            if (!r.ok) {
+              console.error("[Job Detail] /api/jobs/detail failed:", r.status, r.statusText);
+            }
+            return r.json();
+          })
           .then(function(data) {
             if (data.success && data.job) {
               renderJob(data.job);
@@ -217,6 +249,7 @@
       var err = document.getElementById("jdError");
       err.style.display = "block";
       err.textContent = "No job data found. Please go back to the job listings and click on a job.";
+      });
     }
 
     function renderJob(job) {
@@ -304,12 +337,18 @@
       if (!resumeText) { alert("Upload a resume first on the job listings page."); return; }
       var stored = JSON.parse(sessionStorage.getItem("jl_selectedJob"));
       showModal("Cover Letter", '<div class="jd-modal-loading">Generating cover letter...</div>');
+      resolveServerUrl().then(function() {
       fetch(SERVER_URL + "/api/generate-cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resumeText: resumeText, jobDescription: stored.description, jobTitle: stored.title })
       })
-      .then(function(r) { return r.json(); })
+      .then(function(r) {
+        if (!r.ok) {
+          console.error("[Job Detail] /api/generate-cover-letter failed:", r.status, r.statusText);
+        }
+        return r.json();
+      })
       .then(function(data) {
         if (data.success) {
           lastCoverLetter = data.coverLetter;
@@ -324,6 +363,7 @@
         }
       })
       .catch(function(err) { showModal("Cover Letter", "Error: " + escHtml(err.message)); });
+      });
     }
 
     function downloadCoverLetterPDF() {
@@ -390,12 +430,18 @@
       if (!resumeText) { alert("Upload a resume first on the job listings page."); return; }
       var stored = JSON.parse(sessionStorage.getItem("jl_selectedJob"));
       showModal("Job Fit Resume", '<div class="jd-modal-loading">Generating tailored resume...</div>');
+      resolveServerUrl().then(function() {
       fetch(SERVER_URL + "/generate-job-specific-resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resumeText: resumeText, jobDescription: stored.description, jobTitle: stored.title })
       })
-      .then(function(r) { return r.json(); })
+      .then(function(r) {
+        if (!r.ok) {
+          console.error("[Job Detail] /generate-job-specific-resume failed:", r.status, r.statusText);
+        }
+        return r.json();
+      })
       .then(function(data) {
         if (data.success && data.pdf) {
           lastPdfData = data.pdf;
@@ -432,6 +478,7 @@
         }
       })
       .catch(function(err) { showModal("Job Fit Resume", "Error: " + escHtml(err.message)); });
+      });
     }
 
     loadJob();

@@ -1,7 +1,44 @@
 import { Clerk } from 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.mjs';
 
-const CLERK_PUBLISHABLE_KEY = 'pk_test_dGlkeS1hcmFjaG5pZC04Ni5jbGVyay5hY2NvdW50cy5kZXYk';
-window.__SERVER_URL = 'https://careerforge-5ktc.onrender.com';
+const DEFAULT_BACKEND_URL = 'http://localhost:5000';
+
+window.__SERVER_URL = window.__SERVER_URL || DEFAULT_BACKEND_URL;
+window.__CLERK_PUBLISHABLE_KEY = window.__CLERK_PUBLISHABLE_KEY || '';
+
+let runtimeConfigPromise = null;
+
+async function loadRuntimeConfig() {
+  if (runtimeConfigPromise) return runtimeConfigPromise;
+
+  runtimeConfigPromise = (async () => {
+    try {
+      const resp = await fetch('/api/runtime-config', { cache: 'no-store' });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data?.success) {
+        console.error(`[Config] Runtime config request failed: ${resp.status} ${resp.statusText}`);
+        return;
+      }
+
+      if (data.backendUrl) {
+        window.__SERVER_URL = data.backendUrl;
+      }
+      if (data.clerkPublishableKey) {
+        window.__CLERK_PUBLISHABLE_KEY = data.clerkPublishableKey;
+      }
+    } catch (err) {
+      console.error('[Config] Runtime config fetch failed:', err?.message || err);
+    }
+  })();
+
+  return runtimeConfigPromise;
+}
+
+window.__loadRuntimeConfig = loadRuntimeConfig;
+window.__resolveServerUrl = async () => {
+  await loadRuntimeConfig();
+  return window.__SERVER_URL || DEFAULT_BACKEND_URL;
+};
+window.__getBackendUrlSync = () => window.__SERVER_URL || DEFAULT_BACKEND_URL;
 
 const links = [
   { href: '/resume-builder/', label: 'Resume Builder', key: 'resume-builder' },
@@ -89,7 +126,7 @@ window.__getSavedResumes = async () => {
   const headers = await window.__getAuthHeaders();
   if (!headers.Authorization) return [];
   try {
-    const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/profile/resumes`, { headers });
+    const resp = await fetch(`${window.__getBackendUrlSync()}/api/profile/resumes`, { headers });
     const data = await resp.json();
     return data.success ? (data.resumes || []) : [];
   } catch { return []; }
@@ -98,7 +135,7 @@ window.__loadSavedResumePdf = async (resumeId) => {
   const headers = await window.__getAuthHeaders();
   if (!headers.Authorization) throw new Error('Please sign in to access saved resumes');
 
-  const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/profile/resumes/${resumeId}/pdf?dl=0`, { headers });
+  const resp = await fetch(`${window.__getBackendUrlSync()}/api/profile/resumes/${resumeId}/pdf?dl=0`, { headers });
   if (!resp.ok) throw new Error('Could not load saved resume');
   return await resp.blob();
 };
@@ -141,7 +178,7 @@ window.__loadPlanUsage = async () => {
   if (!headers.Authorization) return null;
 
   try {
-    const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/plans/usage`, { headers });
+    const resp = await fetch(`${window.__getBackendUrlSync()}/api/plans/usage`, { headers });
     const data = await resp.json().catch(() => ({}));
     return data.success ? data : null;
   } catch {
@@ -337,7 +374,7 @@ let paymentCatalogCache = null;
 async function loadPaymentCatalog() {
   if (paymentCatalogCache) return paymentCatalogCache;
 
-  const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/payment/catalog`);
+  const resp = await fetch(`${window.__getBackendUrlSync()}/api/payment/catalog`);
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok || !data.success) {
     throw new Error(data.error || `Server error ${resp.status}`);
@@ -372,7 +409,7 @@ async function createPlanOrder(planKey) {
   const headers = await window.__getAuthHeaders();
   if (!headers.Authorization) throw new Error('Please sign in first');
 
-  const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/payment/create-order`, {
+  const resp = await fetch(`${window.__getBackendUrlSync()}/api/payment/create-order`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({ plan: planKey }),
@@ -390,7 +427,7 @@ async function verifyAndApplyPlan(planKey, payload) {
   const headers = await window.__getAuthHeaders();
   if (!headers.Authorization) throw new Error('Please sign in first');
 
-  const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/payment/verify-and-apply`, {
+  const resp = await fetch(`${window.__getBackendUrlSync()}/api/payment/verify-and-apply`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({
@@ -575,7 +612,7 @@ async function populatePlanModal(context = {}) {
       try {
         const headers = await window.__getAuthHeaders();
         if (!headers.Authorization) throw new Error('Please sign in first');
-        const resp = await fetch(`${window.__SERVER_URL || 'http://localhost:5000'}/api/plans/select-free`, {
+        const resp = await fetch(`${window.__getBackendUrlSync()}/api/plans/select-free`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...headers },
           body: JSON.stringify({}),
@@ -841,9 +878,16 @@ function updateAuthUI() {
 }
 
 async function initClerk() {
-  await loadClerkUIBundle(CLERK_PUBLISHABLE_KEY);
+  await loadRuntimeConfig();
 
-  clerk = new Clerk(CLERK_PUBLISHABLE_KEY);
+  const clerkPublishableKey = window.__CLERK_PUBLISHABLE_KEY;
+  if (!clerkPublishableKey) {
+    throw new Error('Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in runtime config');
+  }
+
+  await loadClerkUIBundle(clerkPublishableKey);
+
+  clerk = new Clerk(clerkPublishableKey);
   await clerk.load({
     ui: { ClerkUI: window.__internal_ClerkUICtor },
     signInFallbackRedirectUrl: window.location.href,

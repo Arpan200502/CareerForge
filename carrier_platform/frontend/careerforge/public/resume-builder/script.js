@@ -1,5 +1,17 @@
 const MODEL = "llama-3.3-70b-versatile";
-const SERVER_URL = "https://careerforge-5ktc.onrender.com";
+const DEFAULT_SERVER_URL = "http://localhost:5000";
+let SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
+
+async function resolveServerUrl() {
+  if (typeof window.__resolveServerUrl === "function") {
+    try {
+      SERVER_URL = await window.__resolveServerUrl();
+    } catch (err) {
+      console.error("[Resume Builder] Failed to resolve backend URL:", err?.message || err);
+    }
+  }
+  return SERVER_URL;
+}
 
 let mediaRecorder = null;
 let audioChunks = [];
@@ -52,10 +64,11 @@ function setMicButtonState(fieldId, state) {
 }
 
 async function speechToTextServerBlob(blob) {
+  const baseUrl = await resolveServerUrl();
   const form = new FormData();
   form.append("file", blob, "audio.wav");
 
-  const resp = await fetch(`${SERVER_URL}/api/speech-to-text`, {
+  const resp = await fetch(`${baseUrl}/api/speech-to-text`, {
     method: "POST",
     body: form,
   });
@@ -70,7 +83,8 @@ async function speechToTextServerBlob(blob) {
 }
 
 async function speechToTextServer(audioBase64) {
-  const resp = await fetch(`${SERVER_URL}/api/speech-to-text`, {
+  const baseUrl = await resolveServerUrl();
+  const resp = await fetch(`${baseUrl}/api/speech-to-text`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ audio: audioBase64 }),
@@ -908,7 +922,8 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 
   if (template === "ats" || template === "olivia" || template === "academic") {
     try {
-      const response = await fetch("https://careerforge-5ktc.onrender.com/generate-resume-latex", {
+      const baseUrl = await resolveServerUrl();
+      const response = await fetch(`${baseUrl}/generate-resume-latex`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -923,6 +938,9 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
           template,
         }),
       });
+      if (!response.ok) {
+        console.error(`[Resume Builder] generate-resume-latex failed: ${response.status} ${response.statusText}`);
+      }
 
       const data = await response.json();
       if (!data.success) throw new Error(data.error);
@@ -1005,13 +1023,17 @@ if (copyBtn) {
         recompileBtn.disabled = true;
 
         try {
-          const response = await fetch("https://careerforge-5ktc.onrender.com/recompile-latex", {
+          const baseUrl = await resolveServerUrl();
+          const response = await fetch(`${baseUrl}/recompile-latex`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ latex }),
           });
+          if (!response.ok) {
+            console.error(`[Resume Builder] recompile-latex failed: ${response.status} ${response.statusText}`);
+          }
 
           const data = await response.json();
           if (!data.success) throw new Error(data.error);

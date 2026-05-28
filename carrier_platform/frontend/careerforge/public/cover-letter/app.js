@@ -1,4 +1,16 @@
-const SERVER_URL = "https://careerforge-5ktc.onrender.com";
+const DEFAULT_SERVER_URL = "http://localhost:5000";
+let SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
+
+async function resolveServerUrl() {
+  if (typeof window.__resolveServerUrl === "function") {
+    try {
+      SERVER_URL = await window.__resolveServerUrl();
+    } catch (err) {
+      console.error("[Cover Letter] Failed to resolve backend URL:", err?.message || err);
+    }
+  }
+  return SERVER_URL;
+}
 
 let resumeText = "";
 let activeResumeName = "";
@@ -154,8 +166,9 @@ async function generateCoverLetter() {
   loading.style.display = "block";
 
   try {
+    const baseUrl = await resolveServerUrl();
     const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
-    const resp = await fetch(`${SERVER_URL}/api/generate-cover-letter`, {
+    const resp = await fetch(`${baseUrl}/api/generate-cover-letter`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({
@@ -164,6 +177,9 @@ async function generateCoverLetter() {
         jobTitle: title || undefined,
       }),
     });
+    if (!resp.ok) {
+      console.error(`[Cover Letter] API failed: ${resp.status} ${resp.statusText}`);
+    }
 
     if (window.__handlePlanLimitResponse && await window.__handlePlanLimitResponse(resp, "Cover Letter", "coverLetter")) {
       loading.style.display = "none";
