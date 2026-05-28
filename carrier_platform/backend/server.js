@@ -205,6 +205,25 @@ app.use((req, res, next) => {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+app.use("/api", (req, res, next) => {
+  const origin = req.headers.origin || "(no origin)";
+  console.log(`[API CORS] ${req.method} ${req.originalUrl} origin=${origin}`);
+
+  if (req.headers.origin) {
+    res.header("Access-Control-Allow-Origin", req.headers.origin);
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin, Accept");
+  res.header("Vary", "Origin");
+
+  if (req.method === "OPTIONS") {
+    console.log(`[API CORS] Preflight handled for ${req.originalUrl}`);
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 app.use(express.json({ limit: "200mb" }));
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 150 * 1024 * 1024 } });
 
