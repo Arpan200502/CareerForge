@@ -186,12 +186,24 @@ const altacvCls = fs.readFileSync("../frontend/careerforge/public/resume-builder
 
 // Middleware
 const allowedOrigin = process.env.FRONTEND_URL;
+const allowedOrigins = String(process.env.FRONTEND_URLS || "")
+  .split(",")
+  .map((item) => item.trim())
+  .filter(Boolean);
 const originRegex = /^https?:\/\/localhost(:\d+)?$/;
+const vercelRegex = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i;
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || origin === allowedOrigin || originRegex.test(origin)) {
+    if (
+      !origin ||
+      origin === allowedOrigin ||
+      allowedOrigins.includes(origin) ||
+      originRegex.test(origin) ||
+      vercelRegex.test(origin)
+    ) {
       callback(null, true);
     } else {
+      console.warn(`[CORS] Blocked origin: ${origin}`);
       callback(null, false);
     }
   },

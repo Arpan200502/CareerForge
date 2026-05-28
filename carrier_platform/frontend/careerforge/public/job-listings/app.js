@@ -1,4 +1,16 @@
-const SERVER_URL = "https://careerforge-5ktc.onrender.com";
+const DEFAULT_SERVER_URL = "http://localhost:5000";
+let SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
+
+async function resolveServerUrl() {
+  if (typeof window.__resolveServerUrl === "function") {
+    try {
+      SERVER_URL = await window.__resolveServerUrl();
+    } catch (err) {
+      console.error("[Jobs] Failed to resolve backend URL:", err?.message || err);
+    }
+  }
+  return SERVER_URL;
+}
 
 let allFilterOptions = { countries: [], sources: [], experienceLevels: [] };
 let resumeText = localStorage.getItem("jl_resumeText") || "";
@@ -184,7 +196,11 @@ function renderPagination() {
 // ── Fetch filter options from backend ──
 async function loadFilterOptions() {
   try {
-    const resp = await fetch(`${SERVER_URL}/api/jobs/filters`);
+    const baseUrl = await resolveServerUrl();
+    const resp = await fetch(`${baseUrl}/api/jobs/filters`);
+    if (!resp.ok) {
+      console.error(`[Jobs] Filters API failed: ${resp.status} ${resp.statusText}`);
+    }
     const data = await resp.json();
     if (data.success) {
       allFilterOptions = data.filters;
@@ -349,12 +365,16 @@ fetchNewBtn.addEventListener("click", async () => {
   fetchNewBtn.textContent = "Fetching...";
   sourceInfo.textContent = "Fetching jobs from all platforms... (check server console)";
   try {
+    const baseUrl = await resolveServerUrl();
     await waitForAuth();
     const headers = await window.__getAuthHeaders();
-    const resp = await fetch(`${SERVER_URL}/api/run-fetch`, {
+    const resp = await fetch(`${baseUrl}/api/run-fetch`, {
       method: "POST",
       headers: headers.Authorization ? { ...headers } : {},
     });
+    if (!resp.ok) {
+      console.error(`[Jobs] Run-fetch API failed: ${resp.status} ${resp.statusText}`);
+    }
     const data = await resp.json();
     if (data.success) {
       sourceInfo.textContent = "Fetch started! Click Refresh in 2-3 mins to load new jobs.";
@@ -380,16 +400,20 @@ async function fetchAndRender(page = currentPage) {
   sourceInfo.textContent = "";
 
   try {
+    const baseUrl = await resolveServerUrl();
     const filters = getFilters();
     filters.page = page;
     console.log("[Jobs] Filters:", JSON.stringify(filters));
 
     const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
-    const matchRes = await fetch(`${SERVER_URL}/api/match-jobs`, {
+    const matchRes = await fetch(`${baseUrl}/api/match-jobs`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({ filters }),
     });
+    if (!matchRes.ok) {
+      console.error(`[Jobs] Match-jobs API failed: ${matchRes.status} ${matchRes.statusText}`);
+    }
     const data = await matchRes.json();
     const jobs = data.jobs || [];
     setPaginationState(data.total || jobs.length, data.totalPages || 1, data.page || page);
@@ -500,10 +524,14 @@ async function waitForAuth() {
 
 async function isAdminUser() {
   try {
+    const baseUrl = await resolveServerUrl();
     await waitForAuth();
     const headers = await window.__getAuthHeaders();
     if (!headers.Authorization) return false;
-    const resp = await fetch(`${SERVER_URL}/api/profile`, { headers });
+    const resp = await fetch(`${baseUrl}/api/profile`, { headers });
+    if (!resp.ok) {
+      console.error(`[Jobs] Profile API failed: ${resp.status} ${resp.statusText}`);
+    }
     const data = await resp.json();
     return data.success && data.profile?.role === "admin";
   } catch {
@@ -523,6 +551,7 @@ async function waitForShell() {
 // ── Init: always fetch fresh from backend ──
 (async function init() {
   await waitForShell();
+  await resolveServerUrl();
   await loadFilterOptions();
   await refreshPlanResultLimit();
   await fetchAndRender(1);

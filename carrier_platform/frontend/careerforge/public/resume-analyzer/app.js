@@ -1,5 +1,19 @@
 import * as pdfjsLib from "/resume-analyzer/libs/pdf.mjs";
 
+const DEFAULT_SERVER_URL = "http://localhost:5000";
+let SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
+
+async function resolveServerUrl() {
+  if (typeof window.__resolveServerUrl === "function") {
+    try {
+      SERVER_URL = await window.__resolveServerUrl();
+    } catch (err) {
+      console.error("[Resume Analyzer] Failed to resolve backend URL:", err?.message || err);
+    }
+  }
+  return SERVER_URL;
+}
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = "/resume-analyzer/libs/pdf.worker.mjs";
 window.__pdfjsLib = pdfjsLib;
 
@@ -462,8 +476,9 @@ btn.onclick = async function () {
           .replace("[JOB TITLE]", jobttl.value);
 
         try {
+          const baseUrl = await resolveServerUrl();
           const response = await fetch(
-            "https://careerforge-5ktc.onrender.com/analyze-resume",
+            `${baseUrl}/analyze-resume`,
             {
               method: "POST",
               headers: {
@@ -478,6 +493,9 @@ btn.onclick = async function () {
               }),
             },
           );
+          if (!response.ok) {
+            console.error(`[Resume Analyzer] analyze-resume failed: ${response.status} ${response.statusText}`);
+          }
 
           if (window.__handlePlanLimitResponse && await window.__handlePlanLimitResponse(response, "Resume Analysis", "resumeAnalysis")) {
             return;
@@ -677,10 +695,14 @@ btn.onclick = async function () {
 
             try {
               const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
-              const resp = await fetch("https://careerforge-5ktc.onrender.com/generate-job-specific-resume", {
+              const baseUrl = await resolveServerUrl();
+              const resp = await fetch(`${baseUrl}/generate-job-specific-resume`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", ...authHeaders },
                 body: JSON.stringify({
+                                if (!resp.ok) {
+                                  console.error(`[Resume Analyzer] generate-job-specific-resume failed: ${resp.status} ${resp.statusText}`);
+                                }
                   resumeText: lastResumeText,
                   jobDescription: lastJobDesc,
                   jobTitle: lastJobTitle,

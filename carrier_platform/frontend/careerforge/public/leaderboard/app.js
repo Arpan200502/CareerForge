@@ -1,4 +1,16 @@
-const SERVER_URL = window.__SERVER_URL || 'http://localhost:5000';
+const DEFAULT_SERVER_URL = 'http://localhost:5000';
+let SERVER_URL = window.__SERVER_URL || DEFAULT_SERVER_URL;
+
+async function resolveServerUrl() {
+  if (typeof window.__resolveServerUrl === 'function') {
+    try {
+      SERVER_URL = await window.__resolveServerUrl();
+    } catch (err) {
+      console.error('[Leaderboard] Failed to resolve backend URL:', err?.message || err);
+    }
+  }
+  return SERVER_URL;
+}
 
 let activeCategory = '';
 let clerk = null;
@@ -35,7 +47,10 @@ async function loadAuth() {
 
 async function fetchJson(url) {
   const resp = await fetch(url, { headers: { ...authHeaders } });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  if (!resp.ok) {
+    console.error(`[Leaderboard] API failed: ${resp.status} ${resp.statusText} for ${url}`);
+    throw new Error(`HTTP ${resp.status}`);
+  }
   return resp.json();
 }
 
@@ -186,6 +201,7 @@ async function loadCategoryData(category) {
 
 // ── Bootstrap ──
 async function bootstrap() {
+  await resolveServerUrl();
   await loadAuth();
 
   // Load categories
