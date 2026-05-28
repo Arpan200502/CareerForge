@@ -185,38 +185,25 @@ const PORT = process.env.PORT || 5000;
 const altacvCls = fs.readFileSync("../frontend/careerforge/public/resume-builder/altacv.cls", "utf8");
 
 // Middleware
-const allowedOrigin = process.env.FRONTEND_URL;
-const allowedOrigins = String(process.env.FRONTEND_URLS || "")
-  .split(",")
-  .map((item) => item.trim())
-  .filter(Boolean);
-const originRegex = /^https?:\/\/localhost(:\d+)?$/;
-const vercelRegex = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i;
-const careerForgeRegex = /^https:\/\/(?:www\.)?careerforge\.studio$/i;
-const careerForgeApexRegex = /^https:\/\/careerforge\.studio$/i;
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (
-      !origin ||
-      origin === allowedOrigin ||
-      allowedOrigins.includes(origin) ||
-      originRegex.test(origin) ||
-      vercelRegex.test(origin) ||
-      careerForgeRegex.test(origin) ||
-      careerForgeApexRegex.test(origin)
-    ) {
-      callback(null, true);
-    } else {
-      console.warn(`[CORS] Blocked origin: ${origin}`);
-      callback(null, false);
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  origin: true,
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept"],
+  optionsSuccessStatus: 204,
 };
-app.use(cors({
-  ...corsOptions,
-}));
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin || "(no origin)";
+  if (req.method === "OPTIONS") {
+    console.log(`[CORS] Preflight ${req.method} ${req.originalUrl} origin=${origin}`);
+  } else {
+    console.log(`[CORS] Request ${req.method} ${req.originalUrl} origin=${origin}`);
+  }
+  next();
+});
+
+app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.use(express.json({ limit: "200mb" }));
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 150 * 1024 * 1024 } });
