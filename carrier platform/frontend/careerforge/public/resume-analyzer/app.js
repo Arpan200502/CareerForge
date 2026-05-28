@@ -463,7 +463,7 @@ btn.onclick = async function () {
 
         try {
           const response = await fetch(
-            "http://localhost:5000/analyze-resume",
+            "https://careerforge-5ktc.onrender.com/analyze-resume",
             {
               method: "POST",
               headers: {
@@ -677,7 +677,7 @@ btn.onclick = async function () {
 
             try {
               const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
-              const resp = await fetch("http://localhost:5000/generate-job-specific-resume", {
+              const resp = await fetch("https://careerforge-5ktc.onrender.com/generate-job-specific-resume", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", ...authHeaders },
                 body: JSON.stringify({

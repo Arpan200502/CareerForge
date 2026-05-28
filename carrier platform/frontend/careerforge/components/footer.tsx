@@ -1,5 +1,4 @@
 "use client";
-import { Sparkles } from "lucide-react";
 
 const footerLinks = {
   Platform: ["Features", "Pricing", "About", "FAQ"],
@@ -13,8 +12,7 @@ export function Footer() {
       <div className="mx-auto w-full max-w-6xl px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="size-5 text-white" />
+            <div className="mb-4">
               <span className="font-bold text-white tracking-tight">CareerForge</span>
             </div>
             <p className="text-sm text-white/50 max-w-xs">

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { FileText, User, Award, Briefcase, Sparkles } from "lucide-react";
+import { FileText, User, Award, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Header } from "@/components/ui/header-2";
@@ -132,7 +132,6 @@ export default function Home() {
           <div className="flex h-full flex-col md:flex-row">
             <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="size-5 text-white" />
                 <span className="text-sm font-mono text-white/60">AI-Powered Career Platform</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 leading-tight pb-6">

@@ -5,7 +5,7 @@
 //  • Sarvam AI (via backend for TTS/STT)
 // ═══════════════════════════════════════════════════════════
 
-const SERVER_URL = "http://localhost:5000";
+const SERVER_URL = "https://careerforge-5ktc.onrender.com";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";

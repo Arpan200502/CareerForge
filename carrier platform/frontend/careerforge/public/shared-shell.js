@@ -1,7 +1,7 @@
 import { Clerk } from 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.mjs';
 
 const CLERK_PUBLISHABLE_KEY = 'pk_test_dGlkeS1hcmFjaG5pZC04Ni5jbGVyay5hY2NvdW50cy5kZXYk';
-window.__SERVER_URL = 'http://localhost:5000';
+window.__SERVER_URL = 'https://careerforge-5ktc.onrender.com';
 
 const links = [
   { href: '/resume-builder/', label: 'Resume Builder', key: 'resume-builder' },
@@ -174,8 +174,9 @@ function shellMarkup(activeKey) {
   return `
     <header class="cf-shell-nav">
       <nav class="cf-shell-inner">
-        <a class="cf-shell-brand" href="/">
-          <span>CareerForge</span>
+        <a class="cf-shell-brand" href="/" style="position:relative;display:flex;align-items:center;">
+          <img src="/logo.png" alt="CareerForge" style="position:absolute;top:50%;left:0;height:64px;width:auto;transform:translateY(-50%);object-fit:contain;padding-top:2px;" />
+          <div style="width:60px;"></div>
         </a>
         <div class="cf-shell-links" id="cf-shell-links">${navLinks}</div>
         <div class="cf-shell-actions" id="cf-shell-actions">

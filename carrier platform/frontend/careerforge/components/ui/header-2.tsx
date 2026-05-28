@@ -5,7 +5,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/app/lib/utils";
 import { MenuToggleIcon } from "@/components/ui/menu-toggle-icon";
 import { useScroll } from "@/components/ui/use-scroll";
-import { Sparkles } from "lucide-react";
+import Image from "next/image";
 
 const publicLinks = [
   { label: "Features", href: "#features" },
@@ -67,10 +67,19 @@ export function Header() {
             { "md:px-2": scrolled },
           )}
         >
-          <a href="/" className="flex items-center gap-2">
-            <Sparkles className="size-5 text-primary" />
-            <span className="font-bold tracking-tight pr-6">CareerForge</span>
-          </a>
+         <a href="/" className="relative flex items-center">
+          <Image
+            src="/logo.png"
+            alt="CareerForge"
+            width={260}
+            height={260}
+            className="absolute top-1/2 left-0 h-32 w-auto -translate-y-1/2 object-contain pt-2 pb-2"
+            priority
+          />
+
+          {/* spacing so text/navbar doesn't overlap */}
+          <div className="w-28" />
+        </a>
           <div className="hidden items-center gap-2 md:flex">
             {links.map((link, i) => (
               <a key={i} className={buttonVariants({ variant: "ghost" })} href={makeHref(link.href)}>

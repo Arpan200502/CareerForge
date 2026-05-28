@@ -1,5 +1,5 @@
 const MODEL = "llama-3.3-70b-versatile";
-const SERVER_URL = "http://localhost:5000";
+const SERVER_URL = "https://careerforge-5ktc.onrender.com";
 
 let mediaRecorder = null;
 let audioChunks = [];
@@ -908,7 +908,7 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 
   if (template === "ats" || template === "olivia" || template === "academic") {
     try {
-      const response = await fetch("http://localhost:5000/generate-resume-latex", {
+      const response = await fetch("https://careerforge-5ktc.onrender.com/generate-resume-latex", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1005,7 +1005,7 @@ if (copyBtn) {
         recompileBtn.disabled = true;
 
         try {
-          const response = await fetch("http://localhost:5000/recompile-latex", {
+          const response = await fetch("https://careerforge-5ktc.onrender.com/recompile-latex", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

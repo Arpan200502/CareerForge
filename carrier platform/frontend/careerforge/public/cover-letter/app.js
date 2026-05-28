@@ -1,4 +1,4 @@
-const SERVER_URL = "http://localhost:5000";
+const SERVER_URL = "https://careerforge-5ktc.onrender.com";
 
 let resumeText = "";
 let activeResumeName = "";
