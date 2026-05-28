@@ -310,20 +310,25 @@ select option {
 }
 
 /* Demo buttons & Home — ghost style */
-.demo-btn, .hmbtn {
+.demo-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 7px 12px;
-  border-radius: var(--radius-md);
+  padding: 3px 6px;
+  border-radius: 6px;
   border: 1px solid var(--field-border);
   background: transparent;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 500;
   transition: background 130ms, border-color 130ms, color 130ms, transform 130ms;
 }
-
+.demo-btn {
+  padding: 0px 8px !important;
+  font-size: 11px !important;
+  height: 20px !important;
+  min-width: unset !important;
+}
 .demo-btn:hover, .hmbtn:hover {
   background: rgba(217,216,255,0.10);
   border-color: rgba(217,216,255,0.35);
@@ -394,7 +399,7 @@ select option {
   min-height: calc(100vh - 240px);
   border: 0;
   border-radius: 10px;
-  background: #0d1425;
+  background: #1a1a1a;
   box-shadow: 0 16px 48px rgba(0,0,0,0.5);
   transition: height 0.25s ease;
 }

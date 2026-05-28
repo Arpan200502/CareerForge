@@ -1084,28 +1084,52 @@ if (copyBtn) {
 // -------- RESUME DEMO DATA --------
 const resumeDemoData = {
   1: {
-    personalInfo: `Arjun Mehta, arjun.mehta@example.com, +91 9876543210, Bengaluru, India, linkedin.com/in/arjunmehta, github.com/arjun-dev`,
-
-    education: `B.Tech in Computer Science and Engineering from SRM Institute of Science and Technology. Graduation year is 2024. CGPA is 8.7/10. studied Data Structures, Algorithms, OS, DBMS, AI & ML etc.
+    personalInfo: `Arjun Mehta, arjun.mehta@example.com, +91 9876543210, Bengaluru India, linkedin maybe linkedin.com/in/arjunmehta, github.com/arjun-dev or something like that. interested in backend dev, cloud, AI stuff and scalable systems etc.
+DOB maybe 2002. willing to relocate. open to remote and hybrid jobs.
 `,
 
-    experience: `I did a Software Engineering Internship at Infosys from May to July 2023. basically i worked on some internal dashboard features using React and Node.js. i think i improved the load speed by like somthing i dont remember % or something? also implemented some APIs for real-time data stuff using Express.js. collaborated with a team of 6 engineers in agile sprints.
-Before that i was a Backend Developer Intern at Zeta Tech (Jan - Mar 2023). built REST APIs in Python using FastAPI. i also optimized DB queries using PostgreSQL. designed some authentication flows that reduced login time by some % maybe.
-
-
+    education: `B.Tech CSE from SRM Institute Chennai finished in 2024 CGPA 8.7 maybe 8.6 idk exactly.
+Did subjects like DSA, DBMS, Operating Systems, Computer Networks, AI ML cloud computing etc.
+12th CBSE around 84 percent from Delhi Public School.
+10th ICSE around 88 percent.
+Participated in hackathons and coding contests during college.
 `,
 
-    projects: `ASmart Attendance System. used Python and OpenCV and Flask. it was a face recognition system, accuracy was aroundsome degree i dont reemeberthe exact percventage. built an admin panel and stored logs in MySQL i think.
-E-Commerce Web App. built with React, Node.js and MongoDB. implemented cart, checkout, auth and an admin dashboard. integrated a payment gateway and used caching for performance.
-AI Resume Builder. used HTML CSS JS and the Gemini API. it's an AI-powered resume generator. has PDF export and HTML export features.r. used HTML CSS JS and the Gemini API. it's an AI-powered resume generator. has PDF export and HTML export features.`,
+    experience: `Software Engineering Intern Infosys May 2023 to July 2023.
+worked on internal dashboard project using React and Node backend. made some APIs and fixed bugs and improved speed of pages maybe around 30 or 40 percent not sure. also worked with charts and realtime data stuff using websockets maybe.
+team had around 5 or 6 developers and we used agile meetings everyday.
 
-    skills: `frontend backend languages databases Python, JavaScript, Java, C++, HTML, CSS, React.js, Tailwind, Node.js, Express.js, FastAPI, MongoDB, MySQL, PostgreSQL, Git, Docker, Postman, Google Cloud, Firebase
+Backend Intern at Zeta Tech Jan 2023 to Mar 2023.
+worked mostly in FastAPI and PostgreSQL. created auth APIs login signup forgot password etc. optimized some SQL queries and caching. reduced API response times from maybe 2 sec to below 1 sec in some places.
+also worked with docker little bit.
+
+Freelance Web Dev small local client project.
+made a gym website with payment integration and admin panel. client wanted responsive design and whatsapp integration. deployed on vercel and render free tier.
 `,
 
-    extracurricular: `•English, Hindi
- Participated in college tech events
-• Self-learning web development through projects
-• Regular problem solving and coding practice`,
+    projects: `Smart Attendance System using Python OpenCV Flask and MySQL. face recognition based attendance system for college project. accuracy was decent maybe 90+ but not fully stable in low light. had admin login attendance logs export and analytics charts.
+
+
+AI Resume Builder using HTML CSS JS Gemini API.
+AI powered resume generation platform with PDF export and ATS optimization. users can input details and generate resumes automatically. added templates and live preview. some latency issues were there with API sometimes.
+
+Realtime Chat App Socket.io Node React.
+users can join rooms and send realtime messages. added typing indicator and online offline status. tried adding video calling but couldnt fully finish it.
+
+Issue Intelligence Dashboard.
+uploaded CSV support ticket data and generated trending issue insights using clustering and analytics. calculated issue growth and impact scores. frontend in React and backend in Express.
+`,
+
+    skills: `JavaScript Python Java C++ HTML CSS React Node Express MongoDB MySQL PostgreSQL FastAPI Docker Git GitHub Tailwind Firebase Redis maybe AWS basics Linux REST APIs JWT authentication responsive design problem solving debugging DSA OOP DBMS OS CN cloud basics prompt engineering AI tools
+`,
+
+    extracurricular: `participated in hackathons and tech fests.
+did coding practice on leetcode and hackerrank sometimes.
+helped juniors with web dev projects.
+self learned MERN stack from youtube and udemy.
+interested in startups AI products and backend engineering.
+languages english hindi little bengali.
+`,
   },
 };
 

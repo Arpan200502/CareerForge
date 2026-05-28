@@ -69,7 +69,7 @@ export function Header() {
         >
           <a href="/" className="flex items-center gap-2">
             <Sparkles className="size-5 text-primary" />
-            <span className="font-bold tracking-tight">CareerForge</span>
+            <span className="font-bold tracking-tight pr-6">CareerForge</span>
           </a>
           <div className="hidden items-center gap-2 md:flex">
             {links.map((link, i) => (

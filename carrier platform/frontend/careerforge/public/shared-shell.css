@@ -927,6 +927,10 @@ body.cf-shell-enabled :is(
   transition: all 0.25s ease;
 }
 
+body.cf-shell-enabled .cl-generate-btn {
+  color: #000000;
+}
+
 body.cf-shell-enabled :is(
   .btn-primary,
   .cl-generate-btn,

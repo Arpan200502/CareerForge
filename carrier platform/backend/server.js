@@ -1982,8 +1982,16 @@ app.use("/api/plans", plansRouter);
 app.use("/api/payment", paymentRouter);
 
 // Health check
+const startTime = Date.now();
+
 app.get("/api/health", (req, res) => {
-  res.json({ status: "Server is running", port: PORT });
+  const uptime = Math.floor((Date.now() - startTime) / 1000);
+  const days = Math.floor(uptime / 86400);
+  const hours = Math.floor((uptime % 86400) / 3600);
+  const minutes = Math.floor((uptime % 3600) / 60);
+  const seconds = uptime % 60;
+  const uptimeStr = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  res.json({ status: "Server is running", port: PORT, uptime: uptimeStr, uptimeSeconds: uptime });
 });
 
 // Start server
