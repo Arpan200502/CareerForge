@@ -26,6 +26,9 @@ const fetchNewBtn = document.getElementById("fetchNewBtn");
 let currentPage = 1;
 let currentTotalPages = 1;
 let currentTotalJobs = 0;
+let planJobLimit = null;
+
+const RESULT_LIMIT_OPTIONS = [10, 25, 50, 100, 200];
 
 // Filter elements
 const filterTitle = document.getElementById("filterTitle");
@@ -57,8 +60,65 @@ function getFilters() {
     platforms: platforms.length > 0 ? platforms : undefined,
     keywords: keywords.length > 0 ? keywords : undefined,
     hoursOld: filterHoursOld.value || undefined,
-    limit: parseInt(filterLimit.value) || 50,
+    limit: getRequestedResultLimit(),
   };
+}
+
+function getRequestedResultLimit() {
+  const selectedLimit = parseInt(filterLimit.value) || 50;
+  if (planJobLimit == null || planJobLimit === Infinity) return selectedLimit;
+  return Math.min(selectedLimit, planJobLimit);
+}
+
+function getMaxSelectableResultLimit() {
+  if (planJobLimit == null || planJobLimit === Infinity) {
+    return RESULT_LIMIT_OPTIONS[RESULT_LIMIT_OPTIONS.length - 1];
+  }
+
+  const allowed = RESULT_LIMIT_OPTIONS.filter((value) => value <= planJobLimit);
+  return allowed.length ? allowed[allowed.length - 1] : RESULT_LIMIT_OPTIONS[0];
+}
+
+function applyPlanResultLimit() {
+  if (!filterLimit) return;
+
+  const limitRow = filterLimit.closest(".jl-filter-group");
+  const limitLabel = limitRow?.querySelector("label");
+
+  if (planJobLimit != null && planJobLimit !== Infinity) {
+    // Free/Pro — fixed total cap, hide dropdown, show label
+    if (limitRow) limitRow.style.display = "none";
+
+    const infoEl = document.getElementById("planLimitInfo") || (() => {
+      const el = document.createElement("div");
+      el.id = "planLimitInfo";
+      el.className = "jl-plan-limit-info";
+      el.style.cssText = "color: var(--accent); font-size: 0.85rem; margin-bottom: 0.5rem;";
+      filterLimit.parentNode.insertBefore(el, filterLimit);
+      return el;
+    })();
+    infoEl.textContent = `Your plan allows viewing up to ${planJobLimit} jobs total`;
+  } else {
+    // Max plan — show dropdown with all options
+    if (limitRow) limitRow.style.display = "";
+    const infoEl = document.getElementById("planLimitInfo");
+    if (infoEl) infoEl.remove();
+
+    Array.from(filterLimit.options).forEach((option) => {
+      option.disabled = false;
+    });
+  }
+}
+
+async function refreshPlanResultLimit() {
+  if (typeof window.__loadPlanUsage !== "function") return;
+
+  const usage = await window.__loadPlanUsage();
+  if (!usage || !usage.limits) return;
+
+  const rawLimit = usage.limits.viewJobs;
+  planJobLimit = rawLimit === Infinity ? Infinity : Number(rawLimit) || null;
+  applyPlanResultLimit();
 }
 
 function setPaginationState(totalJobs, totalPages, page) {
@@ -273,7 +333,7 @@ clearFiltersBtn.addEventListener("click", () => {
   filterJobType.value = "";
   filterRemote.value = "";
   filterHoursOld.value = "";
-  filterLimit.value = "200";
+  filterLimit.value = String(getMaxSelectableResultLimit());
   filterPlatforms.querySelectorAll("input[type=checkbox]").forEach((cb) => (cb.checked = true));
   filterKeywords.querySelectorAll("input[type=checkbox]").forEach((cb) => (cb.checked = false));
   fetchAndRender(1);
@@ -324,9 +384,10 @@ async function fetchAndRender(page = currentPage) {
     filters.page = page;
     console.log("[Jobs] Filters:", JSON.stringify(filters));
 
+    const authHeaders = window.__getAuthHeaders ? await window.__getAuthHeaders() : {};
     const matchRes = await fetch(`${SERVER_URL}/api/match-jobs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({ filters }),
     });
     const data = await matchRes.json();
@@ -364,7 +425,11 @@ async function fetchAndRender(page = currentPage) {
 function renderJobs(jobs) {
   jobGrid.innerHTML = "";
   emptyState.style.display = "none";
-  jobCount.textContent = `${currentTotalJobs} job${currentTotalJobs !== 1 ? "s" : ""} found • Page ${currentPage} of ${currentTotalPages}`;
+  let countText = `${currentTotalJobs} job${currentTotalJobs !== 1 ? "s" : ""} found`;
+  if (currentTotalPages > 1) {
+    countText += ` • Page ${currentPage} of ${currentTotalPages}`;
+  }
+  jobCount.textContent = countText;
 
   const platforms = [...new Set(jobs.map((j) => j.source).filter(Boolean))];
   sourceInfo.textContent = `Sources: ${platforms.join(", ")}`;
@@ -446,9 +511,20 @@ async function isAdminUser() {
   }
 }
 
+// ── Wait for shared shell (loaded as deferred module) ──
+async function waitForShell() {
+  for (let i = 0; i < 100; i++) {
+    if (typeof window.__getAuthHeaders === "function") return;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  console.warn("[Jobs] Shell helpers not available after 10s");
+}
+
 // ── Init: always fetch fresh from backend ──
 (async function init() {
+  await waitForShell();
   await loadFilterOptions();
+  await refreshPlanResultLimit();
   await fetchAndRender(1);
   const admin = await isAdminUser();
   if (!admin) {

@@ -24,6 +24,7 @@ const normalizeScore = require("./utils/normalizeScore");
 const leaderboardRouter = require("./routes/leaderboard");
 const plansRouter = require("./routes/plans");
 const paymentRouter = require("./routes/payment");
+const PLAN_LIMITS = require("./config/planLimits");
 const checkUsageLimit = require("./middleware/checkUsageLimit");
 
 // Force Google DNS for SRV lookups (Node.js c-ares has issues on some networks)
@@ -150,6 +151,31 @@ async function clerkAuthOptional(req, res, next) {
     }
   } catch (_) {}
   next();
+}
+
+function getViewJobsLimitForPlan(plan) {
+  const rawLimit = PLAN_LIMITS[plan]?.viewJobs;
+  if (rawLimit === Infinity) return Infinity;
+
+  const limit = Number(rawLimit);
+  if (Number.isFinite(limit) && limit > 0) return limit;
+
+  const fallback = Number(PLAN_LIMITS.free?.viewJobs);
+  return Number.isFinite(fallback) && fallback > 0 ? fallback : 10;
+}
+
+async function resolveJobListingAccess(req) {
+  let plan = "free";
+
+  if (req.auth?.userId) {
+    const profile = await Profile.findOne({ clerkId: req.auth.userId }).select("plan").lean();
+    plan = profile?.plan || "free";
+  }
+
+  return {
+    plan,
+    planLimit: getViewJobsLimitForPlan(plan),
+  };
 }
 
 const app = express();
@@ -1736,25 +1762,47 @@ app.post("/api/speech-to-text", upload.single("file"), async (req, res) => {
 // ── Job Listings ────────────────────────────────────────────
 
 // POST /api/fetch-jobs — Return cached jobs from MongoDB (no new scraper calls)
-app.post("/api/fetch-jobs", async (req, res) => {
+app.post("/api/fetch-jobs", clerkAuthOptional, async (req, res) => {
+  let plan = "free";
+  let planLimit = getViewJobsLimitForPlan(plan);
   try {
     const { filters } = req.body;
     const query = {};
-    const limit = Math.min(parseInt(filters?.limit) || 50, 200);
-    const page = Math.max(parseInt(filters?.page) || 1, 1);
-    const skip = (page - 1) * limit;
-    const total = await Job.countDocuments(query);
+    ({ plan, planLimit } = await resolveJobListingAccess(req));
+
+    let limit, page, skip, total;
+    if (planLimit === Infinity) {
+      // Max plan — full paginated access
+      const requestedLimit = Math.min(parseInt(filters?.limit) || 50, 200);
+      limit = requestedLimit;
+      page = Math.max(parseInt(filters?.page) || 1, 1);
+      skip = (page - 1) * limit;
+      total = await Job.countDocuments(query);
+    } else {
+      // Free/Pro — fixed total cap, no pagination
+      limit = planLimit;
+      page = 1;
+      skip = 0;
+      total = Math.min(await Job.countDocuments(query), planLimit);
+    }
+
     const jobs = await Job.find(query).sort({ fetchedAt: -1, _id: -1 }).skip(skip).limit(limit);
-    res.json({ success: true, jobs, source: "mongodb-cache", total, page, totalPages: Math.ceil(total / limit) });
+    res.json({
+      success: true, jobs, source: "mongodb-cache",
+      total, page,
+      totalPages: planLimit === Infinity ? Math.ceil(total / limit) : 1,
+      plan, planLimit, limit
+    });
   } catch (error) {
     console.error("Fetch Jobs Error:", error.message);
-    const cached = await Job.find().sort({ fetchedAt: -1, _id: -1 }).limit(50).catch(() => []);
-    res.json({ success: true, jobs: cached, cached: true });
+    const fallbackLimit = planLimit === Infinity ? 50 : Math.max(1, Math.min(planLimit, 50));
+    const cached = await Job.find().sort({ fetchedAt: -1, _id: -1 }).limit(fallbackLimit).catch(() => []);
+    res.json({ success: true, jobs: cached, cached: true, plan, planLimit, limit: fallbackLimit });
   }
 });
 
 // POST /api/match-jobs — Filter & return jobs from MongoDB (no AI)
-app.post("/api/match-jobs", async (req, res) => {
+app.post("/api/match-jobs", clerkAuthOptional, async (req, res) => {
   try {
     const { filters } = req.body || {};
     console.log("[Jobs] Filters:", JSON.stringify(filters || {}));
@@ -1809,13 +1857,31 @@ app.post("/api/match-jobs", async (req, res) => {
       }
     }
 
-    const limit = Math.min(parseInt(filters?.limit) || 50, 200);
-    const page = Math.max(parseInt(filters?.page) || 1, 1);
-    const skip = (page - 1) * limit;
-    const total = await Job.countDocuments(query);
+    const { plan, planLimit } = await resolveJobListingAccess(req);
+
+    let limit, page, skip, total;
+    if (planLimit === Infinity) {
+      // Max plan — full paginated access
+      const requestedLimit = Math.min(parseInt(filters?.limit) || 50, 200);
+      limit = requestedLimit;
+      page = Math.max(parseInt(filters?.page) || 1, 1);
+      skip = (page - 1) * limit;
+      total = await Job.countDocuments(query);
+    } else {
+      // Free/Pro — fixed total cap, no pagination
+      limit = planLimit;
+      page = 1;
+      skip = 0;
+      total = Math.min(await Job.countDocuments(query), planLimit);
+    }
+
     const jobs = await Job.find(query).sort({ fetchedAt: -1, _id: -1 }).skip(skip).limit(limit).lean();
 
-    res.json({ success: true, jobs, total, page, totalPages: Math.ceil(total / limit) });
+    res.json({
+      success: true, jobs, total, page,
+      totalPages: planLimit === Infinity ? Math.ceil(total / limit) : 1,
+      plan, planLimit, limit
+    });
   } catch (error) {
     console.error("[Jobs] Error:", error.message);
     res.status(500).json({ success: false, error: error.message });
