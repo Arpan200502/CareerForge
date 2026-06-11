@@ -10,7 +10,7 @@ The platform has been designed with a modern SaaS-inspired user experience and f
                  
 CareerForge has been built using the MERN Stack architecture along with several external APIs and cloud services such as Clerk Authentication, Cloudinary, Razorpay, Sarvam AI, and Job Aggregation APIs.
 
-The main objective behind the project is to transform a college-level academic project into a fully functional industry-grade product that solves real-world problems faced by students, freshers, and professionals during job preparation.
+The main objective behind the project is to transform a college-level academic project into a fully functional  industry-grade product that solves real-world problems faced by students, freshers, and professionals during job preparation.
 
 ---
 ## 🧭 Getting Started — Clone and Run Locally
