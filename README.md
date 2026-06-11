@@ -5,7 +5,7 @@
 CareerForge is a production-level AI-powered career development platform developed to assist users throughout their entire placement and job preparation journey. Unlike conventional platforms that focus on only one area such as resume building or job searching, CareerForge combines multiple career-oriented tools into one integrated ecosystem. The platform aims to eliminate repetitive workflows, reduce friction during the job application process, and provide intelligent AI-powered guidance at every stage of career preparation. 
 
 The project evolved from an earlier AI Resume Builder concept into a complete SaaS-based Career Platform capable of handling resume generation, ATS optimization, interview preparation, cover letter generation, intelligent job discovery, leaderboard gamification, subscription plans, and payment systems.
-
+ 
 The platform has been designed with a modern SaaS-inspired user experience and focuses heavily on automation, personalization, scalability, and real-world usability.
                  
 CareerForge has been built using the MERN Stack architecture along with several external APIs and cloud services such as Clerk Authentication, Cloudinary, Razorpay, Sarvam AI, and Job Aggregation APIs.
